@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_sms_expenses_reader_toolbar"
+        android:background="@color/orange">
+
+        <ImageView
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            app:srcCompat="@drawable/ic_arrow_back_white_36dp"
+            android:id="@+id/activity_sms_expenses_reader_arrow_back"
+            android:layout_gravity="left|start"
+            android:clickable="true"
+            android:background="@drawable/activity_input_data_buttons_style" />
+
+        <TextView
+            android:id="@+id/activity_sms_expenses_reader_toolbar_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/activity_sms_expenses_reader_arrow_back"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center"
+            android:layout_toEndOf="@+id/activity_sms_expenses_reader_arrow_back"
+            android:layout_toRightOf="@+id/activity_sms_expenses_reader_arrow_back"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingEnd="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingStart="10dp"
+            android:text="@string/sms_expenses_reader_title_string"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/activity_sms_expenses_reader_recycler_view"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" />
+
+
+</LinearLayout>

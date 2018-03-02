@@ -1,0 +1,97 @@
+<RelativeLayout
+    android:id="@+id/activity_main_main_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActivityMainWithFragments">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_main_toolbar"
+        android:background="@color/orange"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/activity_main_toolbar_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingEnd="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingStart="10dp"
+            android:text="@string/activity_main_toolbar_text_view_string"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_alignBottom="@+id/activity_main_backup_data_imageview" />
+
+        <!--<ImageView-->
+            <!--app:srcCompat="@drawable/ic_credit_card_white_24dp"-->
+            <!--android:id="@+id/activity_main_credit_card_imageview"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:background="@drawable/activity_input_data_buttons_style"-->
+            <!--android:clickable="true"-->
+            <!--android:layout_width="36dp"-->
+            <!--android:layout_height="36dp"-->
+            <!--android:layout_alignParentTop="true"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_alignParentEnd="true" />-->
+
+        <!--<ImageView-->
+            <!--app:srcCompat="@drawable/ic_backup_white_24dp"-->
+            <!--android:id="@+id/activity_main_backup_data_imageview"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:background="@drawable/activity_input_data_buttons_style"-->
+            <!--android:clickable="true"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginStart="10dp"-->
+            <!--android:layout_toLeftOf="@+id/activity_main_credit_card_imageview"-->
+            <!--android:layout_width="54dp"-->
+            <!--android:layout_height="36dp" />-->
+        <ImageView
+            app:srcCompat="@drawable/ic_backup_white_24dp"
+            android:id="@+id/activity_main_backup_data_imageview"
+            android:layout_gravity="end"
+            android:background="@drawable/activity_input_data_buttons_style"
+            android:clickable="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="54dp"
+            android:layout_height="36dp" />
+
+    </RelativeLayout>
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/activity_main_tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_main_toolbar"
+        android:background="@color/orange"
+        android:elevation="0dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:tabIndicatorColor="@android:color/white"
+        app:tabIndicatorHeight="2dp"
+        app:tabBackground="@drawable/tab_color_selector"/>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/activity_main_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/activity_main_tab_layout"
+        android:background="@android:color/white" />
+
+</RelativeLayout>

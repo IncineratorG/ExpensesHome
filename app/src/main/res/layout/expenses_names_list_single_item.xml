@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/expenses_names_list_textview"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:paddingBottom="10sp"
+        android:paddingEnd="5sp"
+        android:paddingLeft="5sp"
+        android:paddingRight="5sp"
+        android:paddingStart="5sp"
+        android:paddingTop="10sp" />
+</LinearLayout>

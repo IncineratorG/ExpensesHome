@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/orange">
+
+        <TextView
+            android:id="@+id/choose_period_starting_date_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:text="@string/choose_period_starting_date_textview_string"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="normal|bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="1dp"
+        android:background="@drawable/choose_period_dialog_border">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:weightSum="3"
+            android:id="@+id/choose_period_starting_date_linLayout">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_dayUp"
+                android:layout_weight="1"
+                android:text="+"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+
+            <TextSwitcher
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/choose_period_starting_date_calendar_day"
+                android:minHeight="40dp"
+                android:background="@drawable/calendar_text_switcher_custom">
+
+            </TextSwitcher>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_dayDown"
+                android:layout_weight="1"
+                android:text="-"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="150dp"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_monthUp"
+                android:text="+"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+
+            <TextSwitcher
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_month"
+                android:minHeight="40dp"
+                android:background="@drawable/calendar_text_switcher_custom"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/choose_period_starting_date_calendar_monthDown"
+                android:layout_weight="1"
+                android:text="-"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="75dp"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_yearUp"
+                android:text="+"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+
+            <TextSwitcher
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_year"
+                android:minHeight="40dp"
+                android:background="@drawable/calendar_text_switcher_custom"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_starting_date_calendar_yearDown"
+                android:text="-"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF9800"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FF9800">
+
+        <TextView
+            android:id="@+id/choose_period_ending_date_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:text="@string/choose_period_ending_date_textview_string"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="normal|bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="1dp"
+        android:background="@drawable/choose_period_dialog_border">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:weightSum="3"
+            android:id="@+id/choose_period_ending_date_linlayout">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_dayUp"
+                android:layout_weight="1"
+                android:text="+"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+
+            <TextSwitcher
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/choose_period_ending_date_calendar_day"
+                android:minHeight="40dp"
+                android:background="@drawable/calendar_text_switcher_custom">
+
+            </TextSwitcher>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_dayDown"
+                android:layout_weight="1"
+                android:text="-"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="150dp"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_monthUp"
+                android:text="+"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+
+            <TextSwitcher
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_month"
+                android:minHeight="40dp"
+                android:background="@drawable/calendar_text_switcher_custom"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/choose_period_ending_date_calendar_monthDown"
+                android:layout_weight="1"
+                android:text="-"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="75dp"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_yearUp"
+                android:text="+"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+
+            <TextSwitcher
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_year"
+                android:minHeight="40dp"
+                android:background="@drawable/calendar_text_switcher_custom"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/choose_period_ending_date_calendar_yearDown"
+                android:text="-"
+                android:background="@drawable/calendar_buttons_style"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@drawable/calendar_button_text_color"
+                android:textSize="24sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF9800"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:text="@string/choose_period_dialog_ok_button_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/choose_period_ok"
+            android:layout_weight="1"
+            android:background="@drawable/calendar_buttons_style"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:textColor="@drawable/calendar_button_text_color"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="#FF9800"/>
+
+        <Button
+            android:text="@string/choose_period_dialog_cancel_button_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/choose_period_cancel"
+            android:layout_weight="1"
+            android:background="@drawable/calendar_buttons_style"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:textColor="@drawable/calendar_button_text_color"/>
+    </LinearLayout>
+</LinearLayout>

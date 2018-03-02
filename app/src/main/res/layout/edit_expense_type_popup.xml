@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="1000sp">
+
+
+    <AutoCompleteTextView
+        android:id="@+id/edit_expense_type_popup_expense_type_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edit_text_custom"
+        android:editable="true"
+        android:ems="10"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+
+        android:gravity="center"
+        android:hint="@string/edit_expense_type_popup_expense_type_textview_string"
+        android:minHeight="70sp"
+        android:textAlignment="center"
+        android:textSize="25sp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF9800"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="4"
+        android:layout_marginTop="0dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:weightSum="4">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:weightSum="3">
+
+                <Button
+                    android:id="@+id/edit_expense_type_popup_rename_expense_type_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/keyboard_buttons_custom"
+                    android:text="@string/edit_expense_type_popup_rename_expense_type_button_string"
+                    android:textColor="@drawable/button_text_color_black" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:weightSum="4">
+
+            <Button
+                android:id="@+id/edit_expense_type_popup_cancel_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_buttons_custom"
+                android:text="@string/edit_expense_type_popup_cancel_button_string"
+                android:textColor="@drawable/button_text_color_black" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+</LinearLayout>

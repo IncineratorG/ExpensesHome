@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sms_reader_dialog_sms_body_layout"
+        android:padding="5dp"
+        android:background="@color/orange">
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sms_reader_dialog_sms_body_textview"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:background="@color/orange" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/sms_reader_dialog_sms_body_divider"
+        android:layout_below="@+id/sms_reader_dialog_sms_body_layout"
+        android:background="@color/lightGrey"></LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sms_reader_dialog_expense_type_layout"
+        android:layout_below="@+id/sms_reader_dialog_sms_body_divider"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="5dp">
+
+        <TextView
+            android:id="@+id/sms_reader_dialog_expense_type_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sms_reader_dialog_category_string"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textSize="24sp"
+            android:textStyle="normal|bold" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sms_reader_dialog_expenses_spinner"
+            android:layout_marginTop="5dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/sms_reader_dialog_expense_type_divider"
+        android:layout_below="@+id/sms_reader_dialog_expense_type_layout"
+        android:background="@color/lightGrey"></LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sms_reader_dialog_expense_value_layout"
+        android:layout_below="@+id/sms_reader_dialog_expense_type_divider"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="5dp">
+
+        <TextView
+            android:id="@+id/sms_reader_dialog_expense_value_label_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sms_reader_dialog_value_string"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textSize="24sp"
+            android:textStyle="normal|bold" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:background="@null"
+                android:ems="10"
+                android:id="@+id/sms_reader_dialog_value_edittext"
+                android:textSize="24sp"
+                android:gravity="center_vertical|center"
+                android:layout_marginTop="5dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/sms_reader_dialog_expense_value_divider"
+        android:background="@color/lightGrey"
+        android:layout_below="@+id/sms_reader_dialog_expense_value_layout"></LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sms_reader_dialog_expense_note_layout"
+        android:layout_below="@+id/sms_reader_dialog_expense_value_divider"
+        android:padding="5dp">
+
+        <EditText
+            android:id="@+id/sms_reader_dialog_expense_note_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:ems="10"
+            android:gravity="center_vertical|center"
+            android:hint="@string/sms_reader_dialog_hint_text_string"
+            android:inputType="textPersonName"
+            android:paddingBottom="5dp"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingStart="5dp"
+            android:paddingTop="10dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/sms_reader_dialog_expense_note_divider"
+        android:background="@color/orange"
+        android:layout_below="@+id/sms_reader_dialog_expense_note_layout">
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sms_reader_dialog_buttons_layout"
+        android:layout_below="@+id/sms_reader_dialog_expense_note_divider">
+
+        <Button
+            android:id="@+id/sms_reader_dialog_ok_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/keyboard_buttons_custom"
+            android:text="@string/sms_reader_dialog_save_button_string"
+            android:textColor="@drawable/button_text_color_black" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/orange"></LinearLayout>
+
+        <Button
+            android:id="@+id/sms_reader_dialog_cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/keyboard_buttons_custom"
+            android:text="@string/sms_reader_dialog_cancel_button_string"
+            android:textColor="@drawable/button_text_color_black" />
+    </LinearLayout>
+
+</RelativeLayout>

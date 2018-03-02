@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/current_month_screen_header_layout"
+        android:id="@+id/layout_with_recyclerview"
+        android:layout_marginTop="5dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/current_month_screen_recycler_view"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/current_month_screen_header_layout"
+        android:layout_marginTop="11dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/current_month_screen_month_textview"
+            android:layout_weight="1"
+            android:gravity="right|center_vertical|end"
+            android:text="@string/current_month_screen_month_textview_string" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/arrow_right"
+            android:id="@+id/current_month_screen_arrow_right_imageview" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2dp">
+
+            <TextView
+                android:text="@string/current_month_screen_overall_value_textview_string"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/current_month_screen_overall_value_textview"
+                android:gravity="right|end"
+                android:paddingRight="5dp"
+                android:paddingEnd="5dp"
+                android:paddingStart="5dp"
+                android:paddingLeft="5dp"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/deeperGrey"
+                android:id="@+id/current_month_screen_overall_value_underline"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

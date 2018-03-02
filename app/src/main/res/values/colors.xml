@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#FF9800</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="orange">#FF9800</color>
+    <color name="darkOrange">#FF6D00</color>
+    <color name="veryDarkOrange">#FF5722</color>
+    <color name="deepOrangeLight">#FFCCBC</color>
+    <color name="deepOrange">#BF360C</color>
+
+    <!-- Fragment LastEnteredValues colors-->
+    <color name="editGreen">#00E676</color>
+    <color name="editGreenPressed">#00C853</color>
+    <color name="deleteRed">#FF3D00</color>
+    <color name="deleteRedPressed">#DD2C00</color>
+    <color name="lightGrey">#E0E0E0</color>
+    <color name="customWhite">#FFFFFF</color>
+    <color name="deeperGrey">#BDBDBD</color>
+
+    <!-- Tab color -->
+    <color name="darkerOrange">#FB8C00</color>
+
+    <color name="darkGrey">#9E9E9E</color>
+</resources>

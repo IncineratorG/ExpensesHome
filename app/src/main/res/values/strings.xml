@@ -1,0 +1,264 @@
+<resources>
+    <string name="app_name">Мои расходы</string>
+    <string name="action_settings">Settings</string>
+
+
+    <!-- =================================== DOT_SIGN ========================================== -->
+    <!-- Dot_Sign_String -->
+    <string name="dot_sign_string">.</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =================================== CURRENCY ========================================== -->
+    <!-- Currency_Strings -->
+    <string name="rur_string">руб</string>
+    <string name="usd_string">usd</string>
+    <string name="eur_string">eur</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =============================== ACTIVITY_BACKUP_DATA ================================== -->
+    <!-- activity_backup_data.xml-->
+    <string name="backup_data_toolbar_text_view_string">Резервное копирование</string>
+    <string name="backup_data_status_textview_string">Status: none</string>
+    <string name="backup_data_backup_button_string">Создать резервную копию</string>
+
+    <!-- ActivityBackupData.java -->
+    <string name="abd_statusTextView_noConnection_string">Нет соединения с сетью</string>
+    <string name="abd_statusTextView_acquiringConnection_string">Устанавливаю соединение с сетью...</string>
+    <string name="abd_statusTextView_deleting_string">Удаление...</string>
+    <string name="abd_errorDeletingBackupFolderToast_string">При удалении возникла проблема</string>
+    <string name="abd_backupFolderDeletedToast_string">Резервная копия удалена</string>
+    <string name="abd_statusTextView_searchBackupData_string">Поиск резервных копий...</string>
+    <string name="abd_statusTextView_noBackupDataFound_string">Резервные копии не найдены</string>
+    <string name="abd_statusTextView_backupDataFound_string">Резервные копии найдены</string>
+    <string name="abd_restoreButton_string">Восстановить</string>
+    <string name="abd_restoreFromChosenBackupItemDialogBuilder_Title_string">Внимание!</string>
+    <string name="abd_restoreFromChosenBackupItemDialogBuilder_Message_string">Все записи расходов будут заменены записями из выбранной резервной копии.</string>
+    <string name="abd_restoreFromChosenBackupItemDialogBuilder_continue_button_string">Продолжить</string>
+    <string name="abd_restoreFromChosenBackupItemDialogBuilder_cancel_button_string">Отмена</string>
+    <string name="abd_deleteButton_string">Удалить</string>
+    <string name="abd_deleteBackupItemDialogBuilder_Title_string">Внимание!</string>
+    <string name="abd_deleteBackupItemDialogBuilder_Message_string">Удалить выбранную резервную копию?</string>
+    <string name="abd_deleteBackupItemDialogBuilder_delete_button_string">Удалить</string>
+    <string name="abd_deleteBackupItemDialogBuilder_cancel_button_string">Отмена</string>
+    <string name="abd_cancelButton_string">Отмена</string>
+    <string name="abd_statusTextView_connectionAcquired_string">Соединение установлено</string>
+    <string name="abd_statusTextView_connectionSuspended_string">Соединение приостановлено</string>
+    <string name="abd_statusTextView_chooseGoogleAccount_string">Выберите аккаунт Google</string>
+    <string name="abd_dataSavedSuccessful_string">Сохранение завершено</string>
+    <string name="abd_dataNotSaved_string">Данные не сохранены!</string>
+    <string name="abd_dataRestoredSuccessful_string">Данные восстановлены</string>
+    <string name="abd_dataNotRestored_string">Данные не восстановлены!</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =========================== ACTIVITY_SMS_EXPENSES_READER ============================== -->
+    <!-- sms_reader_dialog.xml-->
+    <string name="sms_reader_dialog_category_string">Категория</string>
+    <string name="sms_reader_dialog_value_string">Сумма, руб.</string>
+    <string name="sms_reader_dialog_hint_text_string">Заметка</string>
+    <string name="sms_reader_dialog_save_button_string">Сохранить</string>
+    <string name="sms_reader_dialog_cancel_button_string">Отмена</string>
+
+    <!-- sms_reader_dialog_spinner_single_item.java -->
+    <!-- activity_sms_expenses_reader.xml -->
+    <string name="sms_expenses_reader_title_string">Чтение расходов из СМС</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =============================== ACTIVITY_INPUT_DATA =================================== -->
+    <!-- activity_input_data.xml-->
+    <string name="activity_input_data_currency_textview_string">руб.</string>
+    <string name="activity_input_data_input_note_edittext_hint_string">Заметка</string>
+    <string name="activity_input_data_ok_string">OK</string>
+    <string name="activity_input_data_del_string">Del</string>
+    <string name="activity_input_data_date_yesterday_button_string">Вчера</string>
+    <string name="activity_input_data_date_today_button_string">Сегодня</string>
+    <string name="activity_input_data_choose_date_button_string">Дата</string>
+
+    <!-- ActivityInputData.java -->
+    <string name="aid_showAlertDialogWithMessage_string">Что-то пошло не так</string>
+    <string name="aid_showAlertDialogWithMessage_v2_string">Введите значение</string>
+    <string name="aid_showAlertDialogWithMessage_v3_string">Тысяча извинений, но всё очень плохо. Попробуйте перезапустить приложение.</string>
+    <string name="aid_dialogBuilder_positive_button_string">OK</string>
+    <string name="aid_wrongPickedDateMessage_string">Выбранная дата ещё не наступила</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ============================ ACTIVITY_MAIN_WITH_FRAGMENTS ============================= -->
+    <!-- activity_main_with_fragments.xml -->
+    <string name="activity_main_toolbar_text_view_string">Мои расходы</string>
+
+    <!-- ActivityMainWithFragments.java -->
+    <string name="fragmentCurrentMonthScreenTab_string">Ввод</string>
+    <string name="fragmentLastEnteredValuesTab_string">Недавнее</string>
+    <string name="fragmentStatisticMainScreenTab_string">Статистика</string>
+    <string name="savedValueSnackbar_saved_string">сохранено</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ============================= CURRENT_MONTH_SCREEN ==================================== -->
+    <!-- fragment_current_month_screen.xml -->
+    <string name="current_month_screen_month_textview_string">Всего за Январь</string>
+    <string name="current_month_screen_overall_value_textview_string">25255 руб.</string>
+
+    <!-- fragment_current_month_screen_single_item.xml -->
+    <string name="current_month_single_item_category_textview_string">Электроника</string>
+    <string name="current_month_single_item_in_current_month_textview_string">В текущем месяце</string>
+    <string name="current_month_single_item_value_textview_string">500 руб.</string>
+
+    <!-- FragmentCurrentMonthScreen.java -->
+    <string name="fcm_currentMonthTextView_string">Всего за</string>
+    <string name="fcm_initialCategoriesArray_Products_string">Продукты</string>
+    <string name="fcm_initialCategoriesArray_Purchases_string">Покупки</string>
+    <string name="fcm_initialCategoriesArray_Street_food_string">Еда вне дома</string>
+    <string name="fcm_initialCategoriesArray_Transport_string">Транспорт</string>
+    <string name="fcm_initialCategoriesArray_Costs_for_apartment_string">Расходы на квартиру</string>
+    <string name="fcm_initialCategoriesArray_Entertainment_string">Развлечения</string>
+    <string name="fcm_initialCategoriesArray_Other_string">Прочее</string>
+    <string name="fcm_addNewCategoryDataUnit_string">Добавить новую категорию</string>
+    <string name="fcm_messageToUser_Category_string">Категория</string>
+    <string name="fcm_messageToUser_already_created_string">уже создана</string>
+    <string name="fcm_newCategoryCreatedSnackbar_created_string">создана</string>
+    <string name="fcm_hasRecordsInCurrentMonthSnackbar_string">Нельзя удалить категорию по которой есть записи в текущем месяце</string>
+    <string name="fcm_deleteCategorySnackbar_string">Запись удалена</string>
+    <string name="fcm_deleteCategorySnackbar_action_cancel_string">Отмена</string>
+    <string name="fcm_restoreItemSnackbar_string">Запись восстановлена</string>
+    <string name="fcm_addNewCostTypeButton_string">Переименовать</string>
+    <string name="fcm_emptyNameToast_string">Введите название категории</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =========================== LAST_ENTERED_VALUES_SCREEN ================================ -->
+    <!-- fragment_last_entered_values_screen.xml-->
+
+    <!-- fragment_last_entered_values_screen_single_item.xml -->
+
+    <!-- AdapterLastEnteredValues.java -->
+    <string name="flev_today_string">Сегодня</string>
+    <string name="flev_yesterday_string">Вчера</string>
+
+    <!-- FragmentLastEnteredValuesScreen.java -->
+    <string name="flev_deleteItemSnackbar_string">Запись удалена</string>
+    <string name="flev_deleteItemSnackbar_action_cancel_string">Отмена</string>
+    <string name="flev_restoreItemSnackbar_string">Запись восстановлена</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ============================= STATISTIC_MAIN_SCREEN =================================== -->
+    <!-- fragment_statistic_main_screen.xml-->
+    <string name="statistic_main_screen_chose_period_button_string">Задать период</string>
+
+    <!-- fragment_statistic_main_screen_single_item.xml -->
+
+    <!-- AdapterStatisticMainScreenRecyclerView.java -->
+    <string name="asmsrv_yearTextView_string">-й год</string>
+    <string name="asmsrv_perMonthValueTextView_string">мес</string>
+
+    <!-- FragmentStatisticMainScreenScreen.java -->
+    <!-- ======================================================================================= -->
+
+
+    <!-- =========================== ACTIVITY_STATISTIC_DETAILED =============================== -->
+    <!-- activity_statistic_detailed.xml-->
+    <string name="activity_statistic_detailed_overall_text_textview_string">Всего</string>
+    <string name="activity_statistic_detailed_toolbar_textview_string">03.05.1989 - 03.05.2089</string>
+    <string name="activity_statistic_detailed_overall_value_textview_string">25255 руб.</string>
+    <string name="activity_statistic_detailed_per_day_textview_string">45812 руб./день</string>
+
+    <!-- activity_statistic_detailed_single_item.xml -->
+
+    <!-- ActivityStatisticDetailed.java -->
+    <string name="asd_perDayExpensesTextView_day_string">день</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ====================== ACTIVITY_STATISTIC_EXPENSE_TYPE_DETAILED ======================= -->
+    <!-- activity_statistic_expense_type_detailed.xml-->
+    <string name="activity_statistic_cost_type_detailed_toolbar_textview_string">toolbar</string>
+    <string name="activity_statistic_cost_type_detailed_expense_name_textview_string">Всего</string>
+    <string name="activity_statistic_cost_type_detailed_overall_value_textview_string">25255 руб.</string>
+    <string name="activity_statistic_cost_type_detailed_per_day_textview_string">52147 руб./день</string>
+
+    <!-- activity_statistic_expense_type_detailed_single_item.xml -->
+    <string name="expense_type_detailed_single_item_date_textview_string">TextView</string>
+    <string name="expense_type_detailed_single_item_date_overall_value_textview_string">528458 руб.</string>
+    <string name="expense_type_detailed_single_item_expenses_value_textview_string">TextView</string>
+    <string name="expense_type_detailed_single_item_expenses_note_textview_string">Note</string>
+
+    <!-- ActivityStatisticExpenseTypeDetailed.java -->
+    <string name="asetd_perDayExpensesTextView_day_string">день</string>
+
+    <!-- AdapterStatisticExpenseTypeDetailedSpinner.java -->
+    <string name="sortingTypesList_byDate_string">по дате</string>
+    <string name="sortingTypesList_byDailySum_string">по сумме за день</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ============================= ASYNC_TASK_RESTORE_DATA ================================= -->
+    <!-- AsyncTaskRestoreData.java -->
+    <string name="atrd_restoringProgressDialogBuilder_Title_string">Восстановление...</string>
+    <string name="atrd_restoringProgressDialogBuilder_Message_string">Подготовка.</string>
+    <string name="atrd_restoringProgressDialogBuilder_Cancel_string">Отменить</string>
+    <string name="atrd_publishProgress_StageOne_string">Этап 1/3</string>
+    <string name="atrd_publishProgress_StageTwo_string">Этап 2/3</string>
+    <string name="atrd_publishProgress_StageThree_string">Этап 3/3</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =========================== ASYNC_TASK_SAVE_DEVICE_DATA =============================== -->
+    <!-- AsyncTaskSaveDeviceData.java -->
+    <string name="atsdd_statusTextView_savingData_string">Сохранение</string>
+    <string name="atsdd_statusTextView_savingDataOnDisk_string">Сохраняю данные на диск</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =================================== CONSTANTS ========================================= -->
+    <!-- Constants.java -->
+    <!-- ======================================================================================= -->
+
+
+    <!-- ==================== DIALOG_FRAGMENT_CHOOSE_STATISTIC_PERIOD ========================== -->
+    <!-- DialogFragmentChooseStatisticPeriod.java -->
+    <string name="dfcsp_wrongDateToast_string">Конечная дата раньше начальной</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ======================= DIALOG_FRAGMENT_EDIT_EXPENSE_NAME ============================= -->
+    <!-- DialogFragmentEditExpenseName.java -->
+    <string name="dfeen_categoryTextView_string">Категория</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- =========================== EDIT_COST_VALUE_DIALOG.XML ================================ -->
+    <!-- edit_cost_value_dialog.xml -->
+    <string name="edit_cost_value_dialog_cancel_button_string">Отмена</string>
+    <string name="edit_cost_value_dialog_delete_button_string">Удалить</string>
+    <string name="edit_cost_value_dialog_edit_button_string">Редактировать</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ================================ DATEPICKER.XML ======================================= -->
+    <!-- datepicker.xml -->
+    <string name="datepicker_ok_button_string">OK</string>
+    <string name="datepicker_cancel_button_string">Отмена</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ============================== CHOOSE_PERIOD_DIALOG.XML =============================== -->
+    <!-- choose_period_dialog.xml -->
+    <string name="choose_period_dialog_ok_button_string">OK</string>
+    <string name="choose_period_dialog_cancel_button_string">Отмена</string>
+    <string name="choose_period_starting_date_textview_string">Начальная дата</string>
+    <string name="choose_period_ending_date_textview_string">Конечная дата</string>
+    <!-- ======================================================================================= -->
+
+
+    <!-- ========================= EDIT_EXPENSE_TYPE_POPUP.XML ================================= -->
+    <!-- edit_expense_type_popup.xml -->
+    <string name="edit_expense_type_popup_expense_type_textview_string">Название категории</string>
+    <string name="edit_expense_type_popup_rename_expense_type_button_string">Добавить</string>
+    <string name="edit_expense_type_popup_cancel_button_string">Отмена</string>
+    <!-- ======================================================================================= -->
+</resources>
