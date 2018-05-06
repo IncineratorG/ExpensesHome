@@ -36,29 +36,18 @@
             android:textSize="20sp"
             android:layout_alignBottom="@+id/activity_main_backup_data_imageview" />
 
-        <!--<ImageView-->
-            <!--app:srcCompat="@drawable/ic_credit_card_white_24dp"-->
-            <!--android:id="@+id/activity_main_credit_card_imageview"-->
-            <!--android:layout_gravity="end"-->
-            <!--android:background="@drawable/activity_input_data_buttons_style"-->
-            <!--android:clickable="true"-->
-            <!--android:layout_width="36dp"-->
-            <!--android:layout_height="36dp"-->
-            <!--android:layout_alignParentTop="true"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:layout_alignParentEnd="true" />-->
+        <ImageView
+            app:srcCompat="@drawable/ic_credit_card_white_24dp"
+            android:id="@+id/activity_main_credit_card_imageview"
+            android:layout_gravity="end"
+            android:background="@drawable/activity_input_data_buttons_style"
+            android:clickable="true"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
-        <!--<ImageView-->
-            <!--app:srcCompat="@drawable/ic_backup_white_24dp"-->
-            <!--android:id="@+id/activity_main_backup_data_imageview"-->
-            <!--android:layout_gravity="end"-->
-            <!--android:background="@drawable/activity_input_data_buttons_style"-->
-            <!--android:clickable="true"-->
-            <!--android:layout_marginLeft="10dp"-->
-            <!--android:layout_marginStart="10dp"-->
-            <!--android:layout_toLeftOf="@+id/activity_main_credit_card_imageview"-->
-            <!--android:layout_width="54dp"-->
-            <!--android:layout_height="36dp" />-->
         <ImageView
             app:srcCompat="@drawable/ic_backup_white_24dp"
             android:id="@+id/activity_main_backup_data_imageview"
@@ -67,10 +56,21 @@
             android:clickable="true"
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
+            android:layout_toLeftOf="@+id/activity_main_credit_card_imageview"
             android:layout_width="54dp"
             android:layout_height="36dp" />
+        <!--<ImageView-->
+            <!--app:srcCompat="@drawable/ic_backup_white_24dp"-->
+            <!--android:id="@+id/activity_main_backup_data_imageview"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:background="@drawable/activity_input_data_buttons_style"-->
+            <!--android:clickable="true"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginStart="10dp"-->
+            <!--android:layout_alignParentEnd="true"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_width="54dp"-->
+            <!--android:layout_height="36dp" />-->
 
     </RelativeLayout>
 

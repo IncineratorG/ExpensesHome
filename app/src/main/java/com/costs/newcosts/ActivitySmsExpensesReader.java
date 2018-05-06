@@ -1,20 +1,34 @@
 package com.costs.newcosts;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
  * TODO: Add a class header comment
  */
 
-public class ActivitySmsExpensesReader extends AppCompatActivity {
+public class ActivitySmsExpensesReader extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int LOADER_ID = 1;
     private static final String SMS_URI = "content://sms/inbox";
@@ -52,7 +66,104 @@ public class ActivitySmsExpensesReader extends AppCompatActivity {
                 returnToPreviousActivity();
             }
         });
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        smsReaderRecyclerView = (RecyclerView) findViewById(R.id.activity_sms_expenses_reader_recycler_view);
+        smsReaderRecyclerView.setLayoutManager(linearLayoutManager);
+
+        // Выбираем сообщения за последние два дня
+        Calendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.DAY_OF_MONTH, -3);
+        millis = calendar.getTimeInMillis();
+
+        costsDB = DB_Costs.getInstance(this);
+
+//        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
+
+        // =========================================
+        int permissionCheck = ContextCompat.checkSelfPermission(ActivitySmsExpensesReader.this, android.Manifest.permission.READ_SMS);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(ActivitySmsExpensesReader.this,
+                                                new String[]{android.Manifest.permission.READ_SMS},
+                                                MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+        } else {
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        }
+
+//        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+//            if (!ActivityCompat.shouldShowRequestPermissionRationale(ActivitySmsExpensesReader.this, android.Manifest.permission.READ_SMS)) {
+//                showMessageOKCancel("You need to allow access to SMS",
+//                        new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                System.out.println("ON_CLICK");
+//
+//                                ActivityCompat.requestPermissions(ActivitySmsExpensesReader.this, new String[] {android.Manifest.permission.READ_SMS},
+//                                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+//                            }
+//                        });
+//                return;
+//            }
+//
+//            ActivityCompat.requestPermissions(ActivitySmsExpensesReader.this, new String[] {android.Manifest.permission.READ_SMS},
+//                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+//        } else {
+//            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+//        }
+        // ===============================================
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    System.out.println("PERMISSION_GRANTED");
+                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+                } else {
+                    System.out.println("PERMISSION_DENIED");
+                }
+            }
+        }
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(ActivitySmsExpensesReader.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        System.out.println("onCreateLoader()");
+
+        Uri smsUri = Uri.parse(SMS_URI);
+
+        return new CursorLoader(this,
+                smsUri,
+                SMS_PROJECTION,
+                "address = '900' and date > " + String.valueOf(millis),
+                SMS_SELECTION_ARGS,
+                SMS_SORT_ORDER);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
 
     public void returnToPreviousActivity() {
         Intent mainActivityWithFragmentsIntent = new Intent(ActivitySmsExpensesReader.this, ActivityMainWithFragments.class);
