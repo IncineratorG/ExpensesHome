@@ -88,6 +88,11 @@ public class DB_Costs extends SQLiteOpenHelper {
 //        onCreate(db);
     }
 
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+    }
+
     public boolean COSTS_DB_IS_EMPTY() {
         String query = "SELECT * FROM " + TABLE_COST_NAMES;
 
