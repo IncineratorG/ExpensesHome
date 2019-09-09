@@ -1,4 +1,4 @@
-package com.costs.newcosts.stores.abstraction;
+package com.costs.newcosts.stores.common;
 
 import java.util.HashMap;
 import java.util.Map;

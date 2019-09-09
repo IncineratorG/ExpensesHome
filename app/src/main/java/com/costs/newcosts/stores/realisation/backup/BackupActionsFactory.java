@@ -7,6 +7,9 @@ import com.costs.newcosts.stores.realisation.backup.actions.CheckInternetConnect
 import com.costs.newcosts.stores.realisation.backup.actions.ClearStoreAction;
 import com.costs.newcosts.stores.realisation.backup.actions.GetBackupListAction;
 import com.costs.newcosts.stores.realisation.backup.actions.GetRootFolderAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetBackupFilesListAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetDriveServiceBundleAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetRootFolderIdAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetSignInAction;
 
 /**
@@ -16,31 +19,52 @@ public class BackupActionsFactory implements ActionsFactory {
     public static final int GetBackupList = 1;
     public static final int GetRootFolder = 2;
     public static final int CheckInternetConnection = 3;
-    public static final int BuildGoogleDriveServiceAction = 4;
-    public static final int SetSignInAction = 5;
-    public static final int ClearStoreAction = 6;
+    public static final int BuildGoogleDriveService = 4;
+    public static final int SetSignIn = 5;
+    public static final int ClearStore = 6;
+    public static final int SetBackupFilesList = 7;
+    public static final int SetRootFolderId = 8;
+    public static final int SetDriveServiceBundle = 9;
 
 
     @Override
     public Action getAction(int type) {
         switch (type) {
-            case GetBackupList:
+            case GetBackupList: {
                 return new GetBackupListAction();
+            }
 
-            case GetRootFolder:
-                return  new GetRootFolderAction();
+            case GetRootFolder: {
+                return new GetRootFolderAction();
+            }
 
-            case CheckInternetConnection:
+            case CheckInternetConnection: {
                 return new CheckInternetConnectionAction();
+            }
 
-            case BuildGoogleDriveServiceAction:
+            case BuildGoogleDriveService: {
                 return new BuildGoogleDriveServiceAction();
+            }
 
-            case SetSignInAction:
+            case SetSignIn: {
                 return new SetSignInAction();
+            }
 
-            case ClearStoreAction:
+            case ClearStore: {
                 return new ClearStoreAction();
+            }
+
+            case SetBackupFilesList: {
+                return new SetBackupFilesListAction();
+            }
+
+            case SetRootFolderId: {
+                return new SetRootFolderIdAction();
+            }
+
+            case SetDriveServiceBundle: {
+                return new SetDriveServiceBundleAction();
+            }
         }
 
         return null;

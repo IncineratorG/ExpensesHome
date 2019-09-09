@@ -6,13 +6,13 @@ import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
 /**
  * TODO: Add a class header comment
  */
-public class ClearStoreAction implements Action {
+public class SetRootFolderIdAction implements Action {
     private Object mPayload;
 
 
     @Override
     public int getType() {
-        return BackupActionsFactory.ClearStore;
+        return BackupActionsFactory.SetRootFolderId;
     }
 
     @Override

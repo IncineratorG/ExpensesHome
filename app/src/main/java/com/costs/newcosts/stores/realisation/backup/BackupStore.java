@@ -7,10 +7,12 @@ import android.util.Log;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
-import com.costs.newcosts.stores.abstraction.Payload;
+import com.costs.newcosts.stores.common.DriveServiceBundle;
+import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.FileList;
 
 /**
  * TODO: Add a class header comment
@@ -26,8 +28,6 @@ public class BackupStore extends Store {
 
     public BackupStore() {
         mState = new BackupState();
-        mState.googleDriveServiceSet.set(false);
-        mState.googleDriveServiceStatus.set("not_set");
         mState.signedIn.set(false);
         mState.hasInternetConnection.set(false);
         mState.rootFolderId.set("");
@@ -69,18 +69,68 @@ public class BackupStore extends Store {
                 break;
             }
 
-            case BackupActionsFactory.SetSignInAction: {
+            case BackupActionsFactory.SetSignIn: {
                 mState.signedIn.set(true);
 
                 break;
             }
 
-            case BackupActionsFactory.ClearStoreAction: {
-                mState.googleDriveServiceSet.set(false);
-                mState.googleDriveServiceStatus.set("not_set");
+            case BackupActionsFactory.ClearStore: {
+                mState.googleDriveServiceBundle.set(new DriveServiceBundle(null, DriveServiceBundle.NotSet));
                 mState.signedIn.set(false);
                 mState.hasInternetConnection.set(false);
                 mState.rootFolderId.set("");
+
+                break;
+            }
+
+            case BackupActionsFactory.SetBackupFilesList: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.SetBackupFilesList->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                FileList filesList = null;
+                if (payload.get("filesList") instanceof FileList) {
+                    filesList = (FileList) payload.get("filesList");
+                } else {
+                    break;
+                }
+
+                mState.backupFilesList.set(filesList);
+
+                break;
+            }
+
+            case BackupActionsFactory.SetRootFolderId: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.SetRootFolderId->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = new Payload();
+                String folderId = null;
+                if (payload.get("folderId") instanceof String) {
+                    folderId = (String) payload.get("folderId");
+                } else {
+                    break;
+                }
+
+                mState.rootFolderId.set(folderId);
+
+                break;
+            }
+
+            case BackupActionsFactory.SetDriveServiceBundle: {
+                if (!(action.getPayload() instanceof DriveServiceBundle)) {
+                    Log.d(TAG, "BackupActionsFactory.SetDriveServiceBundle->BAD_PAYLOAD");
+                    break;
+                }
+
+                DriveServiceBundle driveServiceBundle = (DriveServiceBundle) action.getPayload();
+
+                mState.googleDriveServiceBundle.set(driveServiceBundle);
 
                 break;
             }
@@ -113,7 +163,13 @@ public class BackupStore extends Store {
 
                 mBackupService.getBackupList(googleDriveService, rootFolderId, (fileList) -> {
                     if (fileList != null) {
-                        mState.backupFilesList.set(fileList);
+                        Payload filesListPayload = new Payload();
+                        filesListPayload.set("filesList", fileList);
+
+                        Action setBackupFilesListAction = mActionsFactory.getAction(BackupActionsFactory.SetBackupFilesList);
+                        setBackupFilesListAction.setPayload(filesListPayload);
+
+                        reduce(setBackupFilesListAction);
                     }
                 });
 
@@ -129,19 +185,26 @@ public class BackupStore extends Store {
                 Drive googleDriveService = (Drive) action.getPayload();
 
                 mBackupService.getRootFolder(googleDriveService, (folderId) -> {
+                    Payload payload = new Payload();
+
                     if (folderId == null) {
-                        mState.rootFolderId.set("");
+                        payload.set("folderId", "");
                     } else {
-                        mState.rootFolderId.set(folderId);
+                        payload.set("folderId", folderId);
                     }
+
+                    Action setRootFolderIdAction = mActionsFactory.getAction(BackupActionsFactory.SetRootFolderId);
+                    setRootFolderIdAction.setPayload(payload);
+
+                    reduce(setRootFolderIdAction);
                 });
 
                 break;
             }
 
-            case BackupActionsFactory.BuildGoogleDriveServiceAction: {
+            case BackupActionsFactory.BuildGoogleDriveService: {
                 if (!(action.getPayload() instanceof Payload)) {
-                    Log.d(TAG, "BackupActionsFactory.BuildGoogleDriveServiceAction->BAD_PAYLOAD");
+                    Log.d(TAG, "BackupActionsFactory.BuildGoogleDriveService->BAD_PAYLOAD");
                     break;
                 }
 
@@ -166,7 +229,14 @@ public class BackupStore extends Store {
                     break;
                 }
 
-                mState.googleDriveServiceStatus.set("setting");
+
+                DriveServiceBundle driveServiceBundle = new DriveServiceBundle(null, DriveServiceBundle.Setting);
+
+                Action setDriveServiceBundleAction = mActionsFactory.getAction(BackupActionsFactory.SetDriveServiceBundle);
+                setDriveServiceBundleAction.setPayload(driveServiceBundle);
+
+                reduce(setDriveServiceBundleAction);
+
 
                 Context finalContext = context;
                 String finalAppName = appName;
@@ -174,19 +244,73 @@ public class BackupStore extends Store {
                         (googleAccount -> {
                             Log.d(TAG, "Signed in as " + googleAccount.getEmail());
 
-                            mState.googleDriveService.set(mBackupService.getGoogleDriveService(googleAccount, finalContext, finalAppName));
-                            mState.googleDriveServiceSet.set(true);
-                            mState.googleDriveServiceStatus.set("set");
+                            Drive driveService = mBackupService.getGoogleDriveService(googleAccount, finalContext, finalAppName);
+                            DriveServiceBundle finalDriveServiceBundle = new DriveServiceBundle(driveService, DriveServiceBundle.Set);
+                            setDriveServiceBundleAction.setPayload(finalDriveServiceBundle);
+
+                            reduce(setDriveServiceBundleAction);
                         }),
                         (exception -> {
                             Log.e(TAG, "Unable to sign in.", exception);
 
-                            mState.googleDriveServiceSet.set(false);
-                            mState.googleDriveServiceStatus.set("not_set");
+                            DriveServiceBundle finalDriveServiceBundle = new DriveServiceBundle(null, DriveServiceBundle.NotSet);
+                            setDriveServiceBundleAction.setPayload(finalDriveServiceBundle);
+
+                            reduce(setDriveServiceBundleAction);
                         }));
+
 
                 break;
             }
+
+//            case BackupActionsFactory.BuildGoogleDriveService: {
+//                if (!(action.getPayload() instanceof Payload)) {
+//                    Log.d(TAG, "BackupActionsFactory.BuildGoogleDriveService->BAD_PAYLOAD");
+//                    break;
+//                }
+//
+//                Payload payload = (Payload) action.getPayload();
+//                Intent intent = null;
+//                Context context = null;
+//                String appName = null;
+//
+//                if (payload.get("result_intent") instanceof Intent) {
+//                    intent = (Intent) payload.get("result_intent");
+//                } else {
+//                    break;
+//                }
+//                if (payload.get("context") instanceof Context) {
+//                    context = (Context) payload.get("context");
+//                } else {
+//                    break;
+//                }
+//                if (payload.get("appLabel") instanceof String) {
+//                    appName = (String) payload.get("appLabel");
+//                } else {
+//                    break;
+//                }
+//
+//                mState.googleDriveServiceStatus.set("setting");
+//
+//                Context finalContext = context;
+//                String finalAppName = appName;
+//                mBackupService.getSignInAccount(intent,
+//                        (googleAccount -> {
+//                            Log.d(TAG, "Signed in as " + googleAccount.getEmail());
+//
+//                            mState.googleDriveService.set(mBackupService.getGoogleDriveService(googleAccount, finalContext, finalAppName));
+//                            mState.googleDriveServiceSet.set(true);
+//                            mState.googleDriveServiceStatus.set("set");
+//                        }),
+//                        (exception -> {
+//                            Log.e(TAG, "Unable to sign in.", exception);
+//
+//                            mState.googleDriveServiceSet.set(false);
+//                            mState.googleDriveServiceStatus.set("not_set");
+//                        }));
+//
+//                break;
+//            }
         }
     }
 }

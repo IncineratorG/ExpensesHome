@@ -21,7 +21,8 @@ import com.costs.newcosts.common.types.reactive.realisation.ObservableProperty;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
-import com.costs.newcosts.stores.abstraction.Payload;
+import com.costs.newcosts.stores.common.DriveServiceBundle;
+import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
 import com.costs.newcosts.stores.realisation.Stores;
@@ -30,9 +31,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
@@ -40,7 +38,6 @@ import com.google.api.services.drive.model.FileList;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -146,7 +143,7 @@ public class ActivityBackupData extends AppCompatActivity {
             Log.d(TAG, CLASS_NAME + "->onCreate()->mBackupState_IS_NULL");
         } else {
             // Очищаем всю информацию в хранилище.
-            Action clearStoreAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.ClearStoreAction);
+            Action clearStoreAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.ClearStore);
 
             mBackupStore.dispatch(clearStoreAction);
 
@@ -211,7 +208,7 @@ public class ActivityBackupData extends AppCompatActivity {
 
     private void handleSignInResult(Intent result) {
         // Устанавливаем признак того, что пользователь залогинился.
-        Action signInAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.SetSignInAction);
+        Action signInAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.SetSignIn);
 
         mBackupStore.dispatch(signInAction);
 
@@ -221,7 +218,7 @@ public class ActivityBackupData extends AppCompatActivity {
         payload.set("context", this);
         payload.set("appLabel", getAppLable(this));
 
-        Action buildGoogleDriveServiceAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.BuildGoogleDriveServiceAction);
+        Action buildGoogleDriveServiceAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.BuildGoogleDriveService);
         buildGoogleDriveServiceAction.setPayload(payload);
 
         mBackupStore.dispatch(buildGoogleDriveServiceAction);
@@ -269,19 +266,19 @@ public class ActivityBackupData extends AppCompatActivity {
             }
         });
 
-        mBackupState.googleDriveServiceStatus.subscribe(() -> {
-            switch (mBackupState.googleDriveServiceStatus.get()) {
-                case "set": {
+        mBackupState.googleDriveServiceBundle.subscribe(() -> {
+            switch (mBackupState.googleDriveServiceBundle.get().getDriveServiceStatus()) {
+                case DriveServiceBundle.Set: {
                     statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
                     break;
                 }
 
-                case "setting": {
+                case DriveServiceBundle.Setting: {
                     statusTextView.setText(getResources().getString(R.string.abd_statusTextView_acquiringConnection_string));
                     break;
                 }
 
-                case "not_set": {
+                case DriveServiceBundle.NotSet: {
                     statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
                     break;
                 }

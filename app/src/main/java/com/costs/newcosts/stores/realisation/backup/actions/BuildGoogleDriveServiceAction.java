@@ -12,7 +12,7 @@ public class BuildGoogleDriveServiceAction implements Action {
 
     @Override
     public int getType() {
-        return BackupActionsFactory.BuildGoogleDriveServiceAction;
+        return BackupActionsFactory.BuildGoogleDriveService;
     }
 
     @Override

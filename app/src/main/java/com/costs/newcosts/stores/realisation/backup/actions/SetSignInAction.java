@@ -12,7 +12,7 @@ public class SetSignInAction implements Action {
 
     @Override
     public int getType() {
-        return BackupActionsFactory.SetSignInAction;
+        return BackupActionsFactory.SetSignIn;
     }
 
     @Override
