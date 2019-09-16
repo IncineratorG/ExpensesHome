@@ -30,8 +30,6 @@ public class GetBackupListTask extends AsyncTask<Object, Object, FileList> {
     protected FileList doInBackground(Object... params) {
         FileList files = null;
 
-        Log.d(TAG, "ROOT_FOLDER_ID: " + mRootFolderId);
-
         try {
             files = mGoogleDriveService.files().list()
                     .setSpaces("appDataFolder")
@@ -46,24 +44,6 @@ public class GetBackupListTask extends AsyncTask<Object, Object, FileList> {
 
         return files;
     }
-
-//    @Override
-//    protected FileList doInBackground(Object... params) {
-//        FileList files = null;
-//
-//        try {
-//            files = mGoogleDriveService.files().list()
-//                    .setSpaces("appDataFolder")
-//                    .setFields("nextPageToken, files(id, name)")
-//                    .setPageSize(1000)
-//                    .execute();
-//        } catch (IOException e) {
-//            Log.d(TAG, "GetBackupListTask->doInBackground->IOEXCEPTION");
-//            return files;
-//        }
-//
-//        return files;
-//    }
 
     @Override
     protected void onPostExecute(FileList fileList) {

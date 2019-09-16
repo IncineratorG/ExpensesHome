@@ -109,7 +109,7 @@ public class BackupStore extends Store {
                     break;
                 }
 
-                Payload payload = new Payload();
+                Payload payload = (Payload) action.getPayload();
                 String folderId = null;
                 if (payload.get("folderId") instanceof String) {
                     folderId = (String) payload.get("folderId");
@@ -259,58 +259,8 @@ public class BackupStore extends Store {
                             reduce(setDriveServiceBundleAction);
                         }));
 
-
                 break;
             }
-
-//            case BackupActionsFactory.BuildGoogleDriveService: {
-//                if (!(action.getPayload() instanceof Payload)) {
-//                    Log.d(TAG, "BackupActionsFactory.BuildGoogleDriveService->BAD_PAYLOAD");
-//                    break;
-//                }
-//
-//                Payload payload = (Payload) action.getPayload();
-//                Intent intent = null;
-//                Context context = null;
-//                String appName = null;
-//
-//                if (payload.get("result_intent") instanceof Intent) {
-//                    intent = (Intent) payload.get("result_intent");
-//                } else {
-//                    break;
-//                }
-//                if (payload.get("context") instanceof Context) {
-//                    context = (Context) payload.get("context");
-//                } else {
-//                    break;
-//                }
-//                if (payload.get("appLabel") instanceof String) {
-//                    appName = (String) payload.get("appLabel");
-//                } else {
-//                    break;
-//                }
-//
-//                mState.googleDriveServiceStatus.set("setting");
-//
-//                Context finalContext = context;
-//                String finalAppName = appName;
-//                mBackupService.getSignInAccount(intent,
-//                        (googleAccount -> {
-//                            Log.d(TAG, "Signed in as " + googleAccount.getEmail());
-//
-//                            mState.googleDriveService.set(mBackupService.getGoogleDriveService(googleAccount, finalContext, finalAppName));
-//                            mState.googleDriveServiceSet.set(true);
-//                            mState.googleDriveServiceStatus.set("set");
-//                        }),
-//                        (exception -> {
-//                            Log.e(TAG, "Unable to sign in.", exception);
-//
-//                            mState.googleDriveServiceSet.set(false);
-//                            mState.googleDriveServiceStatus.set("not_set");
-//                        }));
-//
-//                break;
-//            }
         }
     }
 }
