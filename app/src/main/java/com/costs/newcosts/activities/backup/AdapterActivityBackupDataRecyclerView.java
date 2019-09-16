@@ -1,4 +1,4 @@
-package com.costs.newcosts;
+package com.costs.newcosts.activities.backup;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.costs.newcosts.Constants;
+import com.costs.newcosts.R;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;

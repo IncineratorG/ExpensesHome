@@ -1,4 +1,6 @@
-package com.costs.newcosts;
+package com.costs.newcosts.activities.backup;
+
+import com.costs.newcosts.Constants;
 
 /**
  * TODO: Add a class header comment
@@ -21,7 +23,7 @@ public class DataUnitBackupFolder {
     public boolean HAS_COMMENT = false;
 
 
-    DataUnitBackupFolder() {
+    public DataUnitBackupFolder() {
     }
 
 

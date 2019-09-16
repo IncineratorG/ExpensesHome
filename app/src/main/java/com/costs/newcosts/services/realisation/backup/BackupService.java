@@ -4,15 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
-import com.costs.newcosts.ActivityBackupData;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupListCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetRootFolderCompleted;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupListTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetRootFolderTask;
-import com.costs.newcosts.stores.abstraction.Action;
-import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;

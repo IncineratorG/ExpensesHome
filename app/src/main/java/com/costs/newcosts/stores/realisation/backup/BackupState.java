@@ -1,8 +1,7 @@
 package com.costs.newcosts.stores.realisation.backup;
 
 import com.costs.newcosts.common.types.reactive.realisation.ObservableProperty;
-import com.costs.newcosts.stores.common.DriveServiceBundle;
-import com.google.api.services.drive.Drive;
+import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.google.api.services.drive.model.FileList;
 
 /**

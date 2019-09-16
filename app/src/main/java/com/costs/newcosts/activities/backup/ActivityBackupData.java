@@ -1,4 +1,4 @@
-package com.costs.newcosts;
+package com.costs.newcosts.activities.backup;
 
 
 import android.app.Activity;
@@ -20,11 +20,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.costs.newcosts.common.types.reactive.realisation.ObservableProperty;
-import com.costs.newcosts.services.realisation.backup.BackupService;
+import com.costs.newcosts.ActivityMainWithFragments;
+import com.costs.newcosts.Constants;
+import com.costs.newcosts.R;
+import com.costs.newcosts.common.types.reactive.realisation.Subscription;
 import com.costs.newcosts.stores.abstraction.Action;
-import com.costs.newcosts.stores.abstraction.ActionsFactory;
-import com.costs.newcosts.stores.common.DriveServiceBundle;
+import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
@@ -34,7 +35,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -74,15 +74,15 @@ public class ActivityBackupData extends AppCompatActivity {
 
     private ImageView selectGoogleAccountImageView;
 
-
-    private Drive mGoogleDriveService = null;
     private static final int REQUEST_CODE_SIGN_IN = 1;
-    private BackupService mBackupService = null;
 
     private Store mBackupStore;
     private BackupState mBackupState;
-    private ObservableProperty<FileList> mFileListProperty;
 
+    private Subscription backupFilesListSubscription;
+    private Subscription hasInternetConnectionSubscription;
+    private Subscription googleDriveServiceBundleSubscription;
+    private Subscription rootFolderIdSubscription;
 
 
     @Override
@@ -180,6 +180,9 @@ public class ActivityBackupData extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
+        unsubscribeAll();
+
+
 //        if (asyncTaskRestoreData != null)
 //            asyncTaskRestoreData.cancel(true);
 //        disconnectFromGoogleDrive();
@@ -247,11 +250,11 @@ public class ActivityBackupData extends AppCompatActivity {
     }
 
     private void setSubscriptions() {
-        mBackupState.backupFilesList.subscribe(()-> {
+        backupFilesListSubscription = mBackupState.backupFilesList.subscribe(()-> {
             processBackupFiles(mBackupState.backupFilesList.get());
         });
 
-        mBackupState.hasInternetConnection.subscribe(() -> {
+        hasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
             if (!mBackupState.hasInternetConnection.get()) {
                 statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
             } else {
@@ -259,7 +262,7 @@ public class ActivityBackupData extends AppCompatActivity {
             }
         });
 
-        mBackupState.googleDriveServiceBundle.subscribe(() -> {
+        googleDriveServiceBundleSubscription = mBackupState.googleDriveServiceBundle.subscribe(() -> {
             switch (mBackupState.googleDriveServiceBundle.get().getDriveServiceStatus()) {
                 case DriveServiceBundle.Set: {
                     statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
@@ -285,7 +288,7 @@ public class ActivityBackupData extends AppCompatActivity {
             }
         });
 
-        mBackupState.rootFolderId.subscribe(() -> {
+        rootFolderIdSubscription = mBackupState.rootFolderId.subscribe(() -> {
             if (!mBackupState.rootFolderId.get().isEmpty()) {
                 // Получаем список файлов резервных копий.
                 Action getBackupListAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupList);
@@ -301,6 +304,13 @@ public class ActivityBackupData extends AppCompatActivity {
                 Log.d(TAG, "NO_BACKUP_ROOT_FOLDERS_FOUND");
             }
         });
+    }
+
+    private void unsubscribeAll() {
+        mBackupState.hasInternetConnection.unsubscribe(hasInternetConnectionSubscription);
+        mBackupState.rootFolderId.unsubscribe(rootFolderIdSubscription);
+        mBackupState.googleDriveServiceBundle.unsubscribe(googleDriveServiceBundleSubscription);
+        mBackupState.backupFilesList.unsubscribe(backupFilesListSubscription);
     }
 
     private void processBackupFiles(FileList files) {

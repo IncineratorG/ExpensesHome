@@ -7,7 +7,7 @@ import android.util.Log;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
-import com.costs.newcosts.stores.common.DriveServiceBundle;
+import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
