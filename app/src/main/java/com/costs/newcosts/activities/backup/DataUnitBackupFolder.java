@@ -7,7 +7,6 @@ import com.costs.newcosts.Constants;
  */
 
 public class DataUnitBackupFolder {
-
     private String driveId;
     private String title;
     public boolean STATUS_OK = false;
@@ -24,6 +23,7 @@ public class DataUnitBackupFolder {
 
 
     public DataUnitBackupFolder() {
+
     }
 
 

@@ -7,6 +7,7 @@ import android.util.Log;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
+import com.costs.newcosts.stores.realisation.backup.types.BackupContentBundle;
 import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.State;
@@ -134,6 +135,23 @@ public class BackupStore extends Store {
 
                 break;
             }
+
+            case BackupActionsFactory.SetBackupFolderContent: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.SetBackupFolderContent->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                BackupContentBundle backupContentBundle = null;
+                if (payload.get("backupContentBundle") instanceof BackupContentBundle) {
+                    backupContentBundle = (BackupContentBundle) payload.get("backupContentBundle");
+                } else {
+                    break;
+                }
+
+                mState.backupContentBundle.set(backupContentBundle);
+            }
         }
     }
 
@@ -260,6 +278,44 @@ public class BackupStore extends Store {
                         }));
 
                 break;
+            }
+
+            case BackupActionsFactory.GetBackupFolderContent: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.BuildGoogleDriveService->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                Drive googleDriveService = null;
+                String backupFolderId = null;
+
+                if (payload.get("googleDriveService") instanceof Drive) {
+                    googleDriveService = (Drive) payload.get("googleDriveService");
+                } else {
+                    break;
+                }
+                if (payload.get("backupFolderId") instanceof String) {
+                    backupFolderId = (String) payload.get("backupFolderId");
+                } else {
+                    break;
+                }
+
+                mBackupService.getBackupFolderContent(googleDriveService, backupFolderId, (backupContent) -> {
+                    BackupContentBundle backupContentBundle = new BackupContentBundle(
+                            backupContent.getCostValuesInputStream(),
+                            backupContent.getCostNamesInputStream()
+                    );
+
+                    Action setBackupFolderContent = mActionsFactory.getAction(BackupActionsFactory.SetBackupFolderContent);
+
+                    Payload setBackupFolderContentPayload = new Payload();
+                    setBackupFolderContentPayload.set("backupContentBundle", backupContentBundle);
+
+                    setBackupFolderContent.setPayload(setBackupFolderContentPayload);
+
+                    reduce(setBackupFolderContent);
+                });
             }
         }
     }

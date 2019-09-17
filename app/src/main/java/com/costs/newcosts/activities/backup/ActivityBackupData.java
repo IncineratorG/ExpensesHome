@@ -79,10 +79,11 @@ public class ActivityBackupData extends AppCompatActivity {
     private Store mBackupStore;
     private BackupState mBackupState;
 
-    private Subscription backupFilesListSubscription;
-    private Subscription hasInternetConnectionSubscription;
-    private Subscription googleDriveServiceBundleSubscription;
-    private Subscription rootFolderIdSubscription;
+    private Subscription mBackupFilesListSubscription;
+    private Subscription mHasInternetConnectionSubscription;
+    private Subscription mGoogleDriveServiceBundleSubscription;
+    private Subscription mRootFolderIdSubscription;
+    private Subscription mBackupContentSubscription;
 
 
     @Override
@@ -250,11 +251,11 @@ public class ActivityBackupData extends AppCompatActivity {
     }
 
     private void setSubscriptions() {
-        backupFilesListSubscription = mBackupState.backupFilesList.subscribe(()-> {
+        mBackupFilesListSubscription = mBackupState.backupFilesList.subscribe(()-> {
             processBackupFiles(mBackupState.backupFilesList.get());
         });
 
-        hasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
+        mHasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
             if (!mBackupState.hasInternetConnection.get()) {
                 statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
             } else {
@@ -262,7 +263,7 @@ public class ActivityBackupData extends AppCompatActivity {
             }
         });
 
-        googleDriveServiceBundleSubscription = mBackupState.googleDriveServiceBundle.subscribe(() -> {
+        mGoogleDriveServiceBundleSubscription = mBackupState.googleDriveServiceBundle.subscribe(() -> {
             switch (mBackupState.googleDriveServiceBundle.get().getDriveServiceStatus()) {
                 case DriveServiceBundle.Set: {
                     statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
@@ -288,7 +289,7 @@ public class ActivityBackupData extends AppCompatActivity {
             }
         });
 
-        rootFolderIdSubscription = mBackupState.rootFolderId.subscribe(() -> {
+        mRootFolderIdSubscription = mBackupState.rootFolderId.subscribe(() -> {
             if (!mBackupState.rootFolderId.get().isEmpty()) {
                 // Получаем список файлов резервных копий.
                 Action getBackupListAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupList);
@@ -304,13 +305,18 @@ public class ActivityBackupData extends AppCompatActivity {
                 Log.d(TAG, "NO_BACKUP_ROOT_FOLDERS_FOUND");
             }
         });
+
+        mBackupContentSubscription = mBackupState.backupContentBundle.subscribe(() -> {
+            Log.d(TAG, "BACKUP_CONTENT_SET");
+        });
     }
 
     private void unsubscribeAll() {
-        mBackupState.hasInternetConnection.unsubscribe(hasInternetConnectionSubscription);
-        mBackupState.rootFolderId.unsubscribe(rootFolderIdSubscription);
-        mBackupState.googleDriveServiceBundle.unsubscribe(googleDriveServiceBundleSubscription);
-        mBackupState.backupFilesList.unsubscribe(backupFilesListSubscription);
+        mBackupState.hasInternetConnection.unsubscribe(mHasInternetConnectionSubscription);
+        mBackupState.rootFolderId.unsubscribe(mRootFolderIdSubscription);
+        mBackupState.googleDriveServiceBundle.unsubscribe(mGoogleDriveServiceBundleSubscription);
+        mBackupState.backupFilesList.unsubscribe(mBackupFilesListSubscription);
+        mBackupState.backupContentBundle.unsubscribe(mBackupContentSubscription);
     }
 
     private void processBackupFiles(FileList files) {
@@ -402,7 +408,7 @@ public class ActivityBackupData extends AppCompatActivity {
 
                         arrowBackImageView.setEnabled(false);
 
-//                        restoreDataFromBackup(position);
+                        restoreDataFromBackup(position);
                     }
                 });
                 restoreFromChosenBackupItemDialogBuilder.setNegativeButton(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_cancel_button_string), null);
@@ -456,5 +462,28 @@ public class ActivityBackupData extends AppCompatActivity {
         }
 
         return (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "Unknown");
+    }
+
+    private void restoreDataFromBackup(int position) {
+        Log.d(TAG, "restoreDataFromBackup()->POSITION: " + position);
+
+        if (existingDeviceBackupFolders.size() == 0) {
+            Log.i(TAG, "NO BACKUP FILES FOUND");
+            return;
+        }
+
+        String backupFolderId = existingDeviceBackupFolders.get(position).getDriveId();
+
+        Log.d(TAG, "restoreDataFromBackup()->BACKUP_FOLDER_ID: " + backupFolderId);
+
+        Action getBackupFolderContent = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupFolderContent);
+
+        Payload payload = new Payload();
+        payload.set("googleDriveService", mBackupState.googleDriveServiceBundle.get().getDriveService());
+        payload.set("backupFolderId", backupFolderId);
+
+        getBackupFolderContent.setPayload(payload);
+
+        mBackupStore.dispatch(getBackupFolderContent);
     }
 }

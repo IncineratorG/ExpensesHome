@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupFolderContentCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupListCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetRootFolderCompleted;
+import com.costs.newcosts.services.realisation.backup.tasks.GetBackupFolderContentTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupListTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetRootFolderTask;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -65,5 +67,10 @@ public class BackupService {
     public void getRootFolder(Drive googleDriveService, GetRootFolderCompleted callback) {
         GetRootFolderTask getRootFolderTask = new GetRootFolderTask(googleDriveService, callback);
         getRootFolderTask.execute();
+    }
+
+    public void getBackupFolderContent(Drive googleDriveService, String folderId, GetBackupFolderContentCompleted callback) {
+        GetBackupFolderContentTask getBackupFolderContentTask = new GetBackupFolderContentTask(googleDriveService, folderId, callback);
+        getBackupFolderContentTask.execute();
     }
 }
