@@ -7,9 +7,15 @@ import java.util.UUID;
  */
 public class Subscription {
     private String mUuid = null;
+    private Observable mObservable;
 
-    public Subscription() {
+    public Subscription(Observable o) {
         mUuid = UUID.randomUUID().toString();
+        mObservable = o;
+    }
+
+    public void unsubscribe() {
+        mObservable.unsubscribe(this);
     }
 
     @Override

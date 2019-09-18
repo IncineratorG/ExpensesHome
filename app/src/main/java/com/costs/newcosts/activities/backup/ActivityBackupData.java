@@ -39,6 +39,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -308,15 +309,31 @@ public class ActivityBackupData extends AppCompatActivity {
 
         mBackupContentSubscription = mBackupState.backupContentBundle.subscribe(() -> {
             Log.d(TAG, "BACKUP_CONTENT_SET");
+
+            if (mBackupState.backupContentBundle.get().getCostNamesInputStream() == null ||
+                mBackupState.backupContentBundle.get().getCostValuesInputStream() == null) {
+                Log.d(TAG, "ActivityBackupData->BAD_BACKUP_CONTENT");
+                return;
+            }
+
+            Action restoreDbFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.RestoreDbFromBackup);
+
+            Payload payload = new Payload();
+            payload.set("costNamesStream", mBackupState.backupContentBundle.get().getCostNamesInputStream());
+            payload.set("costValuesStream", mBackupState.backupContentBundle.get().getCostValuesInputStream());
+
+            restoreDbFromBackup.setPayload(payload);
+
+            mBackupStore.dispatch(restoreDbFromBackup);
         });
     }
 
     private void unsubscribeAll() {
-        mBackupState.hasInternetConnection.unsubscribe(mHasInternetConnectionSubscription);
-        mBackupState.rootFolderId.unsubscribe(mRootFolderIdSubscription);
-        mBackupState.googleDriveServiceBundle.unsubscribe(mGoogleDriveServiceBundleSubscription);
-        mBackupState.backupFilesList.unsubscribe(mBackupFilesListSubscription);
-        mBackupState.backupContentBundle.unsubscribe(mBackupContentSubscription);
+        mHasInternetConnectionSubscription.unsubscribe();
+        mRootFolderIdSubscription.unsubscribe();
+        mGoogleDriveServiceBundleSubscription.unsubscribe();
+        mBackupFilesListSubscription.unsubscribe();
+        mBackupContentSubscription.unsubscribe();
     }
 
     private void processBackupFiles(FileList files) {

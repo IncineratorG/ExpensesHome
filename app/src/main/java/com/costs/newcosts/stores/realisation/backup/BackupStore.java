@@ -2,6 +2,7 @@ package com.costs.newcosts.stores.realisation.backup;
 
 import android.content.Context;
 import android.content.Intent;
+import android.renderscript.ScriptGroup;
 import android.util.Log;
 
 import com.costs.newcosts.services.realisation.backup.BackupService;
@@ -14,6 +15,8 @@ import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
+
+import java.io.InputStream;
 
 /**
  * TODO: Add a class header comment
@@ -151,6 +154,8 @@ public class BackupStore extends Store {
                 }
 
                 mState.backupContentBundle.set(backupContentBundle);
+
+                break;
             }
         }
     }
@@ -282,7 +287,7 @@ public class BackupStore extends Store {
 
             case BackupActionsFactory.GetBackupFolderContent: {
                 if (!(action.getPayload() instanceof Payload)) {
-                    Log.d(TAG, "BackupActionsFactory.BuildGoogleDriveService->BAD_PAYLOAD");
+                    Log.d(TAG, "BackupActionsFactory.GetBackupFolderContent->BAD_PAYLOAD");
                     break;
                 }
 
@@ -316,6 +321,35 @@ public class BackupStore extends Store {
 
                     reduce(setBackupFolderContent);
                 });
+
+                break;
+            }
+
+            case BackupActionsFactory.RestoreDbFromBackup: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.RestoreDbFromBackup->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                InputStream costValuesStream = null;
+                InputStream costNamesStream = null;
+
+                if (payload.get("costValuesStream") instanceof InputStream) {
+                    costValuesStream = (InputStream) payload.get("costValuesStream");
+                } else {
+                    break;
+                }
+                if (payload.get("costNamesStream") instanceof InputStream) {
+                    costNamesStream = (InputStream) payload.get("costNamesStream");
+                } else {
+                    break;
+                }
+
+
+
+
+
             }
         }
     }

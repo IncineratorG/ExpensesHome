@@ -14,7 +14,7 @@ public class Observable {
     }
 
     public Subscription subscribe(Executable e) {
-        Subscription subscription = new Subscription();
+        Subscription subscription = new Subscription(this);
 
         Subscriber subscriber = new Subscriber(subscription, e);
         mSubscribers.add(subscriber);
