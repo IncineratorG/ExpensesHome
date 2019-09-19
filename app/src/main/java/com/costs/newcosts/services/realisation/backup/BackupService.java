@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupFolderContentCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupListCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetRootFolderCompleted;
+import com.costs.newcosts.services.realisation.backup.callbacks.RestoreDataBaseProgress;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupFolderContentTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupListTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetRootFolderTask;
+import com.costs.newcosts.services.realisation.backup.tasks.RestoreDataBaseTask;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -21,6 +24,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
+import java.io.InputStream;
 import java.util.Collections;
 
 /**
@@ -72,5 +76,10 @@ public class BackupService {
     public void getBackupFolderContent(Drive googleDriveService, String folderId, GetBackupFolderContentCompleted callback) {
         GetBackupFolderContentTask getBackupFolderContentTask = new GetBackupFolderContentTask(googleDriveService, folderId, callback);
         getBackupFolderContentTask.execute();
+    }
+
+    public void restoreDataBase(DB_Costs costsDb, InputStream costValuesStream, InputStream costNamesStream, RestoreDataBaseProgress progressCallback) {
+        RestoreDataBaseTask restoreDataBaseTask = new RestoreDataBaseTask(costsDb, costValuesStream, costNamesStream, progressCallback);
+        restoreDataBaseTask.execute();
     }
 }

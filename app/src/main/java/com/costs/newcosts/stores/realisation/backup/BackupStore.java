@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.renderscript.ScriptGroup;
 import android.util.Log;
 
+import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
@@ -13,6 +14,7 @@ import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
+import com.costs.newcosts.stores.realisation.backup.types.RestoreStatus;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
 
@@ -157,6 +159,25 @@ public class BackupStore extends Store {
 
                 break;
             }
+
+            case BackupActionsFactory.SetRestoreStatus: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.SetRestoreStatus->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                RestoreStatus restoreStatus = null;
+                if (payload.get("restoreStatus") instanceof RestoreStatus) {
+                    restoreStatus = (RestoreStatus) payload.get("restoreStatus");
+                } else {
+                    break;
+                }
+
+                mState.restoreStatus.set(restoreStatus);
+
+                break;
+            }
         }
     }
 
@@ -192,7 +213,7 @@ public class BackupStore extends Store {
                         Action setBackupFilesListAction = mActionsFactory.getAction(BackupActionsFactory.SetBackupFilesList);
                         setBackupFilesListAction.setPayload(filesListPayload);
 
-                        reduce(setBackupFilesListAction);
+                        dispatch(setBackupFilesListAction);
                     }
                 });
 
@@ -219,7 +240,7 @@ public class BackupStore extends Store {
                     Action setRootFolderIdAction = mActionsFactory.getAction(BackupActionsFactory.SetRootFolderId);
                     setRootFolderIdAction.setPayload(payload);
 
-                    reduce(setRootFolderIdAction);
+                    dispatch(setRootFolderIdAction);
                 });
 
                 break;
@@ -258,7 +279,7 @@ public class BackupStore extends Store {
                 Action setDriveServiceBundleAction = mActionsFactory.getAction(BackupActionsFactory.SetDriveServiceBundle);
                 setDriveServiceBundleAction.setPayload(driveServiceBundle);
 
-                reduce(setDriveServiceBundleAction);
+                dispatch(setDriveServiceBundleAction);
 
 
                 Context finalContext = context;
@@ -271,7 +292,7 @@ public class BackupStore extends Store {
                             DriveServiceBundle finalDriveServiceBundle = new DriveServiceBundle(driveService, DriveServiceBundle.Set);
                             setDriveServiceBundleAction.setPayload(finalDriveServiceBundle);
 
-                            reduce(setDriveServiceBundleAction);
+                            dispatch(setDriveServiceBundleAction);
                         }),
                         (exception -> {
                             Log.e(TAG, "Unable to sign in.", exception);
@@ -279,7 +300,7 @@ public class BackupStore extends Store {
                             DriveServiceBundle finalDriveServiceBundle = new DriveServiceBundle(null, DriveServiceBundle.NotSet);
                             setDriveServiceBundleAction.setPayload(finalDriveServiceBundle);
 
-                            reduce(setDriveServiceBundleAction);
+                            dispatch(setDriveServiceBundleAction);
                         }));
 
                 break;
@@ -319,7 +340,7 @@ public class BackupStore extends Store {
 
                     setBackupFolderContent.setPayload(setBackupFolderContentPayload);
 
-                    reduce(setBackupFolderContent);
+                    dispatch(setBackupFolderContent);
                 });
 
                 break;
@@ -334,22 +355,41 @@ public class BackupStore extends Store {
                 Payload payload = (Payload) action.getPayload();
                 InputStream costValuesStream = null;
                 InputStream costNamesStream = null;
+                DB_Costs costsDb = null;
 
                 if (payload.get("costValuesStream") instanceof InputStream) {
                     costValuesStream = (InputStream) payload.get("costValuesStream");
                 } else {
+                    Log.d(TAG, "1");
                     break;
                 }
                 if (payload.get("costNamesStream") instanceof InputStream) {
                     costNamesStream = (InputStream) payload.get("costNamesStream");
                 } else {
+                    Log.d(TAG, "2");
+                    break;
+                }
+                if (payload.get("costsDb") instanceof DB_Costs) {
+                    costsDb = (DB_Costs) payload.get("costsDb");
+                } else {
+                    Log.d(TAG, "3");
                     break;
                 }
 
 
+                mBackupService.restoreDataBase(costsDb, costValuesStream, costNamesStream, (progress) -> {
+                    Action setRestoreStatus = mActionsFactory.getAction(BackupActionsFactory.SetRestoreStatus);
+
+                    Payload restoreStatusPayload = new Payload();
+                    restoreStatusPayload.set("restoreStatus", new RestoreStatus(progress));
+
+                    setRestoreStatus.setPayload(restoreStatusPayload);
+
+                    dispatch(setRestoreStatus);
+                });
 
 
-
+                break;
             }
         }
     }

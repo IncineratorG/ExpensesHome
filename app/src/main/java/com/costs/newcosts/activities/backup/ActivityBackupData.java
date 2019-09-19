@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.costs.newcosts.ActivityMainWithFragments;
 import com.costs.newcosts.Constants;
+import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.R;
 import com.costs.newcosts.common.types.reactive.realisation.Subscription;
 import com.costs.newcosts.stores.abstraction.Action;
@@ -85,6 +86,7 @@ public class ActivityBackupData extends AppCompatActivity {
     private Subscription mGoogleDriveServiceBundleSubscription;
     private Subscription mRootFolderIdSubscription;
     private Subscription mBackupContentSubscription;
+    private Subscription mRestoreStatusSubscription;
 
 
     @Override
@@ -321,10 +323,15 @@ public class ActivityBackupData extends AppCompatActivity {
             Payload payload = new Payload();
             payload.set("costNamesStream", mBackupState.backupContentBundle.get().getCostNamesInputStream());
             payload.set("costValuesStream", mBackupState.backupContentBundle.get().getCostValuesInputStream());
+            payload.set("costsDb", DB_Costs.getInstance(this));
 
             restoreDbFromBackup.setPayload(payload);
 
             mBackupStore.dispatch(restoreDbFromBackup);
+        });
+
+        mRestoreStatusSubscription = mBackupState.restoreStatus.subscribe(() -> {
+            Log.d(TAG, "RESTORE_STATUS: " + mBackupState.restoreStatus.get().getStatus());
         });
     }
 
@@ -334,6 +341,7 @@ public class ActivityBackupData extends AppCompatActivity {
         mGoogleDriveServiceBundleSubscription.unsubscribe();
         mBackupFilesListSubscription.unsubscribe();
         mBackupContentSubscription.unsubscribe();
+        mRestoreStatusSubscription.unsubscribe();
     }
 
     private void processBackupFiles(FileList files) {

@@ -12,6 +12,7 @@ import com.costs.newcosts.stores.realisation.backup.actions.RestoreDbFromBackupA
 import com.costs.newcosts.stores.realisation.backup.actions.SetBackupFilesListAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetBackupFolderContentAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetDriveServiceBundleAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetRestoreStatusAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetRootFolderIdAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetSignInAction;
 
@@ -31,6 +32,7 @@ public class BackupActionsFactory implements ActionsFactory {
     public static final int GetBackupFolderContent = 10;
     public static final int SetBackupFolderContent = 11;
     public static final int RestoreDbFromBackup = 12;
+    public static final int SetRestoreStatus = 13;
 
 
     @Override
@@ -82,6 +84,10 @@ public class BackupActionsFactory implements ActionsFactory {
 
             case RestoreDbFromBackup: {
                 return new RestoreDbFromBackupAction();
+            }
+
+            case SetRestoreStatus: {
+                return new SetRestoreStatusAction();
             }
         }
 
