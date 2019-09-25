@@ -6,6 +6,7 @@ package com.costs.newcosts.stores.realisation.backup.types;
 public class RestoreStatus {
     private String mStatus;
 
+
     public RestoreStatus(String s) {
         this.mStatus = s;
     }

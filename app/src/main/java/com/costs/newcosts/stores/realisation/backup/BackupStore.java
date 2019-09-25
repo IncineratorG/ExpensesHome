@@ -178,6 +178,25 @@ public class BackupStore extends Store {
 
                 break;
             }
+
+            case BackupActionsFactory.StopAsyncTask: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.StopAsyncTask->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                Integer type = null;
+                if (payload.get("taskType") instanceof Integer) {
+                    type = (Integer) payload.get("taskType");
+                } else {
+                    break;
+                }
+
+                mBackupService.stopTask(type);
+
+                break;
+            }
         }
     }
 
@@ -327,16 +346,30 @@ public class BackupStore extends Store {
                     break;
                 }
 
+                BackupContentBundle backupContentBundle = new BackupContentBundle(
+                        null,
+                        null,
+                        BackupContentBundle.Setting
+                );
+
+                Action setBackupFolderContent = mActionsFactory.getAction(BackupActionsFactory.SetBackupFolderContent);
+
+                Payload setBackupFolderContentEmptyPayload = new Payload();
+                setBackupFolderContentEmptyPayload.set("backupContentBundle", backupContentBundle);
+
+                setBackupFolderContent.setPayload(setBackupFolderContentEmptyPayload);
+
+                dispatch(setBackupFolderContent);
+
                 mBackupService.getBackupFolderContent(googleDriveService, backupFolderId, (backupContent) -> {
-                    BackupContentBundle backupContentBundle = new BackupContentBundle(
+                    BackupContentBundle finalBackupContentBundle = new BackupContentBundle(
                             backupContent.getCostValuesInputStream(),
-                            backupContent.getCostNamesInputStream()
+                            backupContent.getCostNamesInputStream(),
+                            BackupContentBundle.Set
                     );
 
-                    Action setBackupFolderContent = mActionsFactory.getAction(BackupActionsFactory.SetBackupFolderContent);
-
                     Payload setBackupFolderContentPayload = new Payload();
-                    setBackupFolderContentPayload.set("backupContentBundle", backupContentBundle);
+                    setBackupFolderContentPayload.set("backupContentBundle", finalBackupContentBundle);
 
                     setBackupFolderContent.setPayload(setBackupFolderContentPayload);
 

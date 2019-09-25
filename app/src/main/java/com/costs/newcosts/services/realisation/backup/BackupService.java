@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupFolderContentCompleted;
@@ -14,6 +15,7 @@ import com.costs.newcosts.services.realisation.backup.tasks.GetBackupFolderConte
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupListTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetRootFolderTask;
 import com.costs.newcosts.services.realisation.backup.tasks.RestoreDataBaseTask;
+import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -31,8 +33,11 @@ import java.util.Collections;
  * TODO: Add a class header comment
  */
 public class BackupService {
-    public BackupService() {
+    private TaskRunner mTaskRunner;
 
+
+    public BackupService() {
+        mTaskRunner = TaskRunner.getInstance();
     }
 
     public boolean hasInternetConnection(Context context) {
@@ -65,21 +70,25 @@ public class BackupService {
 
     public void getBackupList(Drive googleDriveService, String rootFolderId, GetBackupListCompleted callback) {
         GetBackupListTask getBackupListTask = new GetBackupListTask(googleDriveService, rootFolderId, callback);
-        getBackupListTask.execute();
+        mTaskRunner.runTask(getBackupListTask);
     }
 
     public void getRootFolder(Drive googleDriveService, GetRootFolderCompleted callback) {
         GetRootFolderTask getRootFolderTask = new GetRootFolderTask(googleDriveService, callback);
-        getRootFolderTask.execute();
+        mTaskRunner.runTask(getRootFolderTask);
     }
 
     public void getBackupFolderContent(Drive googleDriveService, String folderId, GetBackupFolderContentCompleted callback) {
         GetBackupFolderContentTask getBackupFolderContentTask = new GetBackupFolderContentTask(googleDriveService, folderId, callback);
-        getBackupFolderContentTask.execute();
+        mTaskRunner.runTask(getBackupFolderContentTask);
     }
 
     public void restoreDataBase(DB_Costs costsDb, InputStream costValuesStream, InputStream costNamesStream, RestoreDataBaseProgress progressCallback) {
         RestoreDataBaseTask restoreDataBaseTask = new RestoreDataBaseTask(costsDb, costValuesStream, costNamesStream, progressCallback);
-        restoreDataBaseTask.execute();
+        mTaskRunner.runTask(restoreDataBaseTask);
+    }
+
+    public void stopTask(int type) {
+        mTaskRunner.stopTask(type);
     }
 }

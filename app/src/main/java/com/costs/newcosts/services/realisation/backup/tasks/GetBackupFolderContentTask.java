@@ -75,6 +75,11 @@ public class GetBackupFolderContentTask extends AsyncTask<Object, Object, Backup
     }
 
     @Override
+    protected void onCancelled() {
+        Log.d(TAG, "GET_CONTENT_TASK_CANCELLED");
+    }
+
+    @Override
     protected void onPostExecute(BackupContent backupContent) {
         mCompletionCallback.complete(backupContent);
     }

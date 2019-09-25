@@ -19,13 +19,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.costs.newcosts.ActivityMainWithFragments;
 import com.costs.newcosts.Constants;
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.R;
+import com.costs.newcosts.common.types.reactive.abstraction.Executable;
 import com.costs.newcosts.common.types.reactive.realisation.Subscription;
+import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
 import com.costs.newcosts.stores.abstraction.Action;
+import com.costs.newcosts.stores.realisation.backup.types.BackupContentBundle;
 import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.Store;
@@ -40,7 +44,6 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -87,6 +90,9 @@ public class ActivityBackupData extends AppCompatActivity {
     private Subscription mRootFolderIdSubscription;
     private Subscription mBackupContentSubscription;
     private Subscription mRestoreStatusSubscription;
+
+    private AlertDialog mRestorationProgressDialog;
+    private Executable mRestorationDialogCancelAction;
 
 
     @Override
@@ -157,6 +163,22 @@ public class ActivityBackupData extends AppCompatActivity {
             // Подписываемся на необходимые параметры хранилища.
             setSubscriptions();
         }
+
+
+        AlertDialog.Builder restorationProgressDialogBuilder = new AlertDialog.Builder(ActivityBackupData.this);
+        restorationProgressDialogBuilder.setCancelable(false);
+        restorationProgressDialogBuilder.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
+        restorationProgressDialogBuilder.setNegativeButton(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Cancel_string), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.d(TAG, "DIALOG_CANCEL_BUTTON_CLICKED");
+                if (mRestorationDialogCancelAction != null) {
+                    mRestorationDialogCancelAction.execute();
+                }
+            }
+        });
+
+        mRestorationProgressDialog = restorationProgressDialogBuilder.create();
     }
 
     @Override
@@ -226,7 +248,7 @@ public class ActivityBackupData extends AppCompatActivity {
         Payload payload = new Payload();
         payload.set("result_intent", result);
         payload.set("context", this);
-        payload.set("appLabel", getAppLable(this));
+        payload.set("appLabel", getAppLabel(this));
 
         Action buildGoogleDriveServiceAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.BuildGoogleDriveService);
         buildGoogleDriveServiceAction.setPayload(payload);
@@ -310,28 +332,91 @@ public class ActivityBackupData extends AppCompatActivity {
         });
 
         mBackupContentSubscription = mBackupState.backupContentBundle.subscribe(() -> {
-            Log.d(TAG, "BACKUP_CONTENT_SET");
+            switch (mBackupState.backupContentBundle.get().getContentStatus()) {
+                case BackupContentBundle.Setting: {
+                    mRestorationDialogCancelAction = () -> {
+                        Action cancelLoadingBackupContent = mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopAsyncTask);
 
-            if (mBackupState.backupContentBundle.get().getCostNamesInputStream() == null ||
-                mBackupState.backupContentBundle.get().getCostValuesInputStream() == null) {
-                Log.d(TAG, "ActivityBackupData->BAD_BACKUP_CONTENT");
-                return;
+                        Payload payload = new Payload();
+                        payload.set("taskType", TaskRunner.GetBackupFolderContentTask);
+
+                        cancelLoadingBackupContent.setPayload(payload);
+
+                        mBackupStore.dispatch(cancelLoadingBackupContent);
+
+                        enableBackground();
+                    };
+
+                    mRestorationProgressDialog.setMessage(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Message_string));
+                    mRestorationProgressDialog.show();
+
+                    break;
+                }
+
+                case BackupContentBundle.Set: {
+                    mRestorationDialogCancelAction = () -> {
+                        Action cancelRestoreDataBase = mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopAsyncTask);
+
+                        Payload payload = new Payload();
+                        payload.set("taskType", TaskRunner.RestoreDataBaseTask);
+
+                        cancelRestoreDataBase.setPayload(payload);
+
+                        mBackupStore.dispatch(cancelRestoreDataBase);
+
+                        enableBackground();
+                    };
+                    mRestorationProgressDialog.setMessage("Восстановление");
+
+                    if (mBackupState.backupContentBundle.get().getCostNamesInputStream() == null ||
+                            mBackupState.backupContentBundle.get().getCostValuesInputStream() == null) {
+                        Log.d(TAG, "ActivityBackupData->BAD_BACKUP_CONTENT");
+                        return;
+                    }
+
+                    Action restoreDbFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.RestoreDbFromBackup);
+
+                    Payload payload = new Payload();
+                    payload.set("costNamesStream", mBackupState.backupContentBundle.get().getCostNamesInputStream());
+                    payload.set("costValuesStream", mBackupState.backupContentBundle.get().getCostValuesInputStream());
+                    payload.set("costsDb", DB_Costs.getInstance(this));
+
+                    restoreDbFromBackup.setPayload(payload);
+
+                    mBackupStore.dispatch(restoreDbFromBackup);
+
+                    break;
+                }
             }
-
-            Action restoreDbFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.RestoreDbFromBackup);
-
-            Payload payload = new Payload();
-            payload.set("costNamesStream", mBackupState.backupContentBundle.get().getCostNamesInputStream());
-            payload.set("costValuesStream", mBackupState.backupContentBundle.get().getCostValuesInputStream());
-            payload.set("costsDb", DB_Costs.getInstance(this));
-
-            restoreDbFromBackup.setPayload(payload);
-
-            mBackupStore.dispatch(restoreDbFromBackup);
         });
 
         mRestoreStatusSubscription = mBackupState.restoreStatus.subscribe(() -> {
-            Log.d(TAG, "RESTORE_STATUS: " + mBackupState.restoreStatus.get().getStatus());
+            String restoreStatus = mBackupState.restoreStatus.get().getStatus();
+
+            if (!mRestorationProgressDialog.isShowing()) {
+                Log.d(TAG, "PROGRESS_DIALOG_NOT_SHOWING");
+                return;
+            }
+
+            mRestorationProgressDialog.setMessage(restoreStatus);
+
+            if (restoreStatus.equals(TaskRunner.TaskCompletedStatus) ||
+                restoreStatus.equals(TaskRunner.TaskInterruptedStatus) ||
+                restoreStatus.equals(TaskRunner.TaskErrorOccurredStatus)) {
+                mRestorationProgressDialog.dismiss();
+
+                Toast dataRestoredToast;
+                if (restoreStatus.equals(TaskRunner.TaskCompletedStatus)) {
+                    statusTextView.setText(getResources().getString(R.string.abd_dataRestoredSuccessful_string));
+                    dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataRestoredSuccessful_string), Toast.LENGTH_SHORT);
+                } else {
+                    statusTextView.setText(getResources().getString(R.string.abd_dataNotRestored_string));
+                    dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataNotRestored_string), Toast.LENGTH_SHORT);
+                }
+                dataRestoredToast.show();
+
+                enableBackground();
+            }
         });
     }
 
@@ -426,12 +511,7 @@ public class ActivityBackupData extends AppCompatActivity {
                 restoreFromChosenBackupItemDialogBuilder.setPositiveButton(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_continue_button_string), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        backupDataRecyclerViewAdapter.setClickListener(null);
-
-                        createBackupDataButton.setEnabled(false);
-                        createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData.this, R.color.lightGrey));
-
-                        arrowBackImageView.setEnabled(false);
+                        disableBackground();
 
                         restoreDataFromBackup(position);
                     }
@@ -477,7 +557,7 @@ public class ActivityBackupData extends AppCompatActivity {
         });
     }
 
-    private String getAppLable(Context context) {
+    private String getAppLabel(Context context) {
         PackageManager packageManager = context.getPackageManager();
         ApplicationInfo applicationInfo = null;
         try {
@@ -490,16 +570,12 @@ public class ActivityBackupData extends AppCompatActivity {
     }
 
     private void restoreDataFromBackup(int position) {
-        Log.d(TAG, "restoreDataFromBackup()->POSITION: " + position);
-
         if (existingDeviceBackupFolders.size() == 0) {
             Log.i(TAG, "NO BACKUP FILES FOUND");
             return;
         }
 
         String backupFolderId = existingDeviceBackupFolders.get(position).getDriveId();
-
-        Log.d(TAG, "restoreDataFromBackup()->BACKUP_FOLDER_ID: " + backupFolderId);
 
         Action getBackupFolderContent = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupFolderContent);
 
@@ -510,5 +586,29 @@ public class ActivityBackupData extends AppCompatActivity {
         getBackupFolderContent.setPayload(payload);
 
         mBackupStore.dispatch(getBackupFolderContent);
+    }
+
+    private void enableBackground() {
+        backupDataRecyclerViewAdapter.setClickListener(new AdapterActivityBackupDataRecyclerView.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                onBackupItemClick(position);
+            }
+        });
+
+        createBackupDataButton.setEnabled(true);
+        createBackupDataButton.setBackgroundResource(R.drawable.keyboard_buttons_custom);
+        createBackupDataButton.setTextColor(getResources().getColorStateList(R.color.button_text_color));
+
+        arrowBackImageView.setEnabled(true);
+    }
+
+    private void disableBackground() {
+        backupDataRecyclerViewAdapter.setClickListener(null);
+
+        createBackupDataButton.setEnabled(false);
+        createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData.this, R.color.lightGrey));
+
+        arrowBackImageView.setEnabled(false);
     }
 }

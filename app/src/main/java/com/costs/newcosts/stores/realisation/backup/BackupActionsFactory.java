@@ -15,6 +15,7 @@ import com.costs.newcosts.stores.realisation.backup.actions.SetDriveServiceBundl
 import com.costs.newcosts.stores.realisation.backup.actions.SetRestoreStatusAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetRootFolderIdAction;
 import com.costs.newcosts.stores.realisation.backup.actions.SetSignInAction;
+import com.costs.newcosts.stores.realisation.backup.actions.StopAsyncTaskAction;
 
 /**
  * TODO: Add a class header comment
@@ -33,6 +34,7 @@ public class BackupActionsFactory implements ActionsFactory {
     public static final int SetBackupFolderContent = 11;
     public static final int RestoreDbFromBackup = 12;
     public static final int SetRestoreStatus = 13;
+    public static final int StopAsyncTask = 14;
 
 
     @Override
@@ -88,6 +90,10 @@ public class BackupActionsFactory implements ActionsFactory {
 
             case SetRestoreStatus: {
                 return new SetRestoreStatusAction();
+            }
+
+            case StopAsyncTask: {
+                return new StopAsyncTaskAction();
             }
         }
 
