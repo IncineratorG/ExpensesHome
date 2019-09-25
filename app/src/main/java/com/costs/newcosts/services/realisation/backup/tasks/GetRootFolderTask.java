@@ -45,7 +45,6 @@ public class GetRootFolderTask extends AsyncTask<Object, Object, String> {
                     break;
                 }
             }
-
         } catch (IOException e) {
             Log.d(TAG, "GetRootFolderTask->doInBackground->IOEXCEPTION");
             return rootFolderId;

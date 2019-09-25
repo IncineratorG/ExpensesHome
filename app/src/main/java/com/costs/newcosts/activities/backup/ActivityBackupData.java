@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ import com.costs.newcosts.common.types.reactive.realisation.Subscription;
 import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.realisation.backup.types.BackupContentBundle;
+import com.costs.newcosts.stores.realisation.backup.types.CreateBackupStatus;
 import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.Store;
@@ -40,6 +42,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -90,6 +94,7 @@ public class ActivityBackupData extends AppCompatActivity {
     private Subscription mRootFolderIdSubscription;
     private Subscription mBackupContentSubscription;
     private Subscription mRestoreStatusSubscription;
+    private Subscription mCreateBackupSubscription;
 
     private AlertDialog mRestorationProgressDialog;
     private Executable mRestorationDialogCancelAction;
@@ -107,10 +112,10 @@ public class ActivityBackupData extends AppCompatActivity {
 
         // Кнопка создания резервной копии
         createBackupDataButton = (Button) findViewById(R.id.backup_data_backup_button);
-        createBackupDataButton.setEnabled(true);
+        createBackupDataButton.setEnabled(false);
         createBackupDataButton.setTextColor(ContextCompat.getColor(this, R.color.lightGrey));
         createBackupDataButton.setOnClickListener((v) -> {
-            test();
+            createDeviceBackup();
         });
 
 
@@ -136,12 +141,12 @@ public class ActivityBackupData extends AppCompatActivity {
 
         // Открываем диалоговое окно, в котором можно выбрать аккаунт Google
         selectGoogleAccountImageView = (ImageView) findViewById(R.id.backup_data_account_imageview);
-//        selectGoogleAccountImageView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                selectGoogleAccount();
-//            }
-//        });
+        selectGoogleAccountImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signOut();
+            }
+        });
 
 
 //        requestSignIn();
@@ -222,8 +227,26 @@ public class ActivityBackupData extends AppCompatActivity {
                         .build();
         GoogleSignInClient client = GoogleSignIn.getClient(this, signInOptions);
 
+        Action setGoogleSignInClient = mBackupStore.getActionFactory().getAction(BackupActionsFactory.SetGoogleSignInClient);
+
+        Payload payload = new Payload();
+        payload.set("googleSignInClient", client);
+
+        setGoogleSignInClient.setPayload(payload);
+
+        mBackupStore.dispatch(setGoogleSignInClient);
+
         // The result of the sign-in Intent is handled in onActivityResult.
         startActivityForResult(client.getSignInIntent(), REQUEST_CODE_SIGN_IN);
+    }
+
+    private void signOut() {
+        mBackupState.googleSignInClient.get().signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                requestSignIn();
+            }
+        });
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
@@ -256,11 +279,6 @@ public class ActivityBackupData extends AppCompatActivity {
         mBackupStore.dispatch(buildGoogleDriveServiceAction);
     }
 
-    void test() {
-
-    }
-
-
     @Override
     public void onBackPressed() {
         returnToPreviousActivity();
@@ -275,170 +293,16 @@ public class ActivityBackupData extends AppCompatActivity {
         startActivity(mainActivityWithFragmentsIntent);
     }
 
-    private void setSubscriptions() {
-        mBackupFilesListSubscription = mBackupState.backupFilesList.subscribe(()-> {
-            processBackupFiles(mBackupState.backupFilesList.get());
-        });
-
-        mHasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
-            if (!mBackupState.hasInternetConnection.get()) {
-                statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
-            } else {
-                statusTextView.setText(getResources().getString(R.string.abd_statusTextView_acquiringConnection_string));
-            }
-        });
-
-        mGoogleDriveServiceBundleSubscription = mBackupState.googleDriveServiceBundle.subscribe(() -> {
-            switch (mBackupState.googleDriveServiceBundle.get().getDriveServiceStatus()) {
-                case DriveServiceBundle.Set: {
-                    statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
-
-                    // Получаем ID корневой папки с файлами резервной копии.
-                    Action getRootFolderIdAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetRootFolder);
-                    getRootFolderIdAction.setPayload(mBackupState.googleDriveServiceBundle.get().getDriveService());
-
-                    mBackupStore.dispatch(getRootFolderIdAction);
-
-                    break;
-                }
-
-                case DriveServiceBundle.Setting: {
-                    statusTextView.setText(getResources().getString(R.string.abd_statusTextView_acquiringConnection_string));
-                    break;
-                }
-
-                case DriveServiceBundle.NotSet: {
-                    statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
-                    break;
-                }
-            }
-        });
-
-        mRootFolderIdSubscription = mBackupState.rootFolderId.subscribe(() -> {
-            if (!mBackupState.rootFolderId.get().isEmpty()) {
-                // Получаем список файлов резервных копий.
-                Action getBackupListAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupList);
-
-                Payload payload = new Payload();
-                payload.set("googleDriveService", mBackupState.googleDriveServiceBundle.get().getDriveService());
-                payload.set("rootFolderId", mBackupState.rootFolderId.get());
-
-                getBackupListAction.setPayload(payload);
-
-                mBackupStore.dispatch(getBackupListAction);
-            } else {
-                Log.d(TAG, "NO_BACKUP_ROOT_FOLDERS_FOUND");
-            }
-        });
-
-        mBackupContentSubscription = mBackupState.backupContentBundle.subscribe(() -> {
-            switch (mBackupState.backupContentBundle.get().getContentStatus()) {
-                case BackupContentBundle.Setting: {
-                    mRestorationDialogCancelAction = () -> {
-                        Action cancelLoadingBackupContent = mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopAsyncTask);
-
-                        Payload payload = new Payload();
-                        payload.set("taskType", TaskRunner.GetBackupFolderContentTask);
-
-                        cancelLoadingBackupContent.setPayload(payload);
-
-                        mBackupStore.dispatch(cancelLoadingBackupContent);
-
-                        enableBackground();
-                    };
-
-                    mRestorationProgressDialog.setMessage(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Message_string));
-                    mRestorationProgressDialog.show();
-
-                    break;
-                }
-
-                case BackupContentBundle.Set: {
-                    mRestorationDialogCancelAction = () -> {
-                        Action cancelRestoreDataBase = mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopAsyncTask);
-
-                        Payload payload = new Payload();
-                        payload.set("taskType", TaskRunner.RestoreDataBaseTask);
-
-                        cancelRestoreDataBase.setPayload(payload);
-
-                        mBackupStore.dispatch(cancelRestoreDataBase);
-
-                        enableBackground();
-                    };
-                    mRestorationProgressDialog.setMessage("Восстановление");
-
-                    if (mBackupState.backupContentBundle.get().getCostNamesInputStream() == null ||
-                            mBackupState.backupContentBundle.get().getCostValuesInputStream() == null) {
-                        Log.d(TAG, "ActivityBackupData->BAD_BACKUP_CONTENT");
-                        return;
-                    }
-
-                    Action restoreDbFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.RestoreDbFromBackup);
-
-                    Payload payload = new Payload();
-                    payload.set("costNamesStream", mBackupState.backupContentBundle.get().getCostNamesInputStream());
-                    payload.set("costValuesStream", mBackupState.backupContentBundle.get().getCostValuesInputStream());
-                    payload.set("costsDb", DB_Costs.getInstance(this));
-
-                    restoreDbFromBackup.setPayload(payload);
-
-                    mBackupStore.dispatch(restoreDbFromBackup);
-
-                    break;
-                }
-            }
-        });
-
-        mRestoreStatusSubscription = mBackupState.restoreStatus.subscribe(() -> {
-            String restoreStatus = mBackupState.restoreStatus.get().getStatus();
-
-            if (!mRestorationProgressDialog.isShowing()) {
-                Log.d(TAG, "PROGRESS_DIALOG_NOT_SHOWING");
-                return;
-            }
-
-            mRestorationProgressDialog.setMessage(restoreStatus);
-
-            if (restoreStatus.equals(TaskRunner.TaskCompletedStatus) ||
-                restoreStatus.equals(TaskRunner.TaskInterruptedStatus) ||
-                restoreStatus.equals(TaskRunner.TaskErrorOccurredStatus)) {
-                mRestorationProgressDialog.dismiss();
-
-                Toast dataRestoredToast;
-                if (restoreStatus.equals(TaskRunner.TaskCompletedStatus)) {
-                    statusTextView.setText(getResources().getString(R.string.abd_dataRestoredSuccessful_string));
-                    dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataRestoredSuccessful_string), Toast.LENGTH_SHORT);
-                } else {
-                    statusTextView.setText(getResources().getString(R.string.abd_dataNotRestored_string));
-                    dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataNotRestored_string), Toast.LENGTH_SHORT);
-                }
-                dataRestoredToast.show();
-
-                enableBackground();
-            }
-        });
-    }
-
-    private void unsubscribeAll() {
-        mHasInternetConnectionSubscription.unsubscribe();
-        mRootFolderIdSubscription.unsubscribe();
-        mGoogleDriveServiceBundleSubscription.unsubscribe();
-        mBackupFilesListSubscription.unsubscribe();
-        mBackupContentSubscription.unsubscribe();
-        mRestoreStatusSubscription.unsubscribe();
-    }
-
     private void processBackupFiles(FileList files) {
-        Log.d(TAG, CLASS_NAME + "setSubscriptions()->BACKUP_FILE_LIST_SIZE: " + files.size());
-
         existingDeviceBackupFolders = new ArrayList<>();
-        for (File file : files.getFiles()) {
-            DataUnitBackupFolder backupTitle = new DataUnitBackupFolder();
-            backupTitle.setTitle(file.getName());
-            backupTitle.setDriveId(file.getId());
+        if (files != null) {
+            for (File file : files.getFiles()) {
+                DataUnitBackupFolder backupTitle = new DataUnitBackupFolder();
+                backupTitle.setTitle(file.getName());
+                backupTitle.setDriveId(file.getId());
 
-            existingDeviceBackupFolders.add(backupTitle);
+                existingDeviceBackupFolders.add(backupTitle);
+            }
         }
 
         // Отображаем полученный список резервных копий
@@ -451,6 +315,8 @@ public class ActivityBackupData extends AppCompatActivity {
             }
         });
         backupListRecyclerView.setAdapter(backupDataRecyclerViewAdapter);
+
+        enableBackground();
 
         if (existingDeviceBackupFolders.size() > 0) {
             statusTextView.setText(getResources().getString(R.string.abd_statusTextView_backupDataFound_string));
@@ -557,16 +423,19 @@ public class ActivityBackupData extends AppCompatActivity {
         });
     }
 
-    private String getAppLabel(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        ApplicationInfo applicationInfo = null;
-        try {
-            applicationInfo = packageManager.getApplicationInfo(context.getApplicationInfo().packageName, 0);
-        } catch (final PackageManager.NameNotFoundException e) {
-            Log.d(TAG, CLASS_NAME + "->getAppLabel->NameNotFoundException");
-        }
+    private void createDeviceBackup() {
+        Log.d(TAG, "CREATE_DEVICE_BACKUP: " + mBackupState.rootFolderId.get());
 
-        return (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "Unknown");
+        Action createBackupAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.CreateBackup);
+
+        Payload payload = new Payload();
+        payload.set("rootFolderId", mBackupState.rootFolderId.get());
+        payload.set("googleDriveService", mBackupState.googleDriveServiceBundle.get().getDriveService());
+        payload.set("costsDb", DB_Costs.getInstance(this));
+
+        createBackupAction.setPayload(payload);
+
+        mBackupStore.dispatch(createBackupAction);
     }
 
     private void restoreDataFromBackup(int position) {
@@ -586,6 +455,10 @@ public class ActivityBackupData extends AppCompatActivity {
         getBackupFolderContent.setPayload(payload);
 
         mBackupStore.dispatch(getBackupFolderContent);
+    }
+
+    private void deleteBackupItem(int position) {
+        Log.d(TAG, "DELETE_BACKUP_ITEM");
     }
 
     private void enableBackground() {
@@ -610,5 +483,186 @@ public class ActivityBackupData extends AppCompatActivity {
         createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData.this, R.color.lightGrey));
 
         arrowBackImageView.setEnabled(false);
+    }
+
+    private void setSubscriptions() {
+        mBackupFilesListSubscription = mBackupState.backupFilesList.subscribe(()-> {
+            processBackupFiles(mBackupState.backupFilesList.get());
+        });
+
+        mHasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
+            if (!mBackupState.hasInternetConnection.get()) {
+                statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
+            } else {
+                statusTextView.setText(getResources().getString(R.string.abd_statusTextView_acquiringConnection_string));
+            }
+        });
+
+        mGoogleDriveServiceBundleSubscription = mBackupState.googleDriveServiceBundle.subscribe(() -> {
+            switch (mBackupState.googleDriveServiceBundle.get().getDriveServiceStatus()) {
+                case DriveServiceBundle.Set: {
+                    statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
+
+                    // Получаем ID корневой папки с файлами резервной копии.
+                    Action getRootFolderIdAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetRootFolder);
+                    getRootFolderIdAction.setPayload(mBackupState.googleDriveServiceBundle.get().getDriveService());
+
+                    mBackupStore.dispatch(getRootFolderIdAction);
+
+                    break;
+                }
+
+                case DriveServiceBundle.Setting: {
+                    statusTextView.setText(getResources().getString(R.string.abd_statusTextView_acquiringConnection_string));
+                    break;
+                }
+
+                case DriveServiceBundle.NotSet: {
+                    statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
+                    break;
+                }
+            }
+        });
+
+        mRootFolderIdSubscription = mBackupState.rootFolderId.subscribe(() -> {
+            if (!mBackupState.rootFolderId.get().isEmpty()) {
+                // Получаем список файлов резервных копий.
+                Action getBackupListAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupList);
+
+                Payload payload = new Payload();
+                payload.set("googleDriveService", mBackupState.googleDriveServiceBundle.get().getDriveService());
+                payload.set("rootFolderId", mBackupState.rootFolderId.get());
+
+                getBackupListAction.setPayload(payload);
+
+                mBackupStore.dispatch(getBackupListAction);
+            } else {
+                processBackupFiles(null);
+            }
+        });
+
+        mBackupContentSubscription = mBackupState.backupContentBundle.subscribe(() -> {
+            switch (mBackupState.backupContentBundle.get().getContentStatus()) {
+                case BackupContentBundle.Setting: {
+                    mRestorationDialogCancelAction = () -> {
+                        Action cancelLoadingBackupContent = mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopAsyncTask);
+
+                        Payload payload = new Payload();
+                        payload.set("taskType", TaskRunner.GetBackupFolderContentTask);
+
+                        cancelLoadingBackupContent.setPayload(payload);
+
+                        mBackupStore.dispatch(cancelLoadingBackupContent);
+
+                        enableBackground();
+                    };
+
+                    mRestorationProgressDialog.setMessage(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Message_string));
+                    mRestorationProgressDialog.show();
+
+                    break;
+                }
+
+                case BackupContentBundle.Set: {
+                    mRestorationDialogCancelAction = () -> {
+                        Action cancelRestoreDataBase = mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopAsyncTask);
+
+                        Payload payload = new Payload();
+                        payload.set("taskType", TaskRunner.RestoreDataBaseTask);
+
+                        cancelRestoreDataBase.setPayload(payload);
+
+                        mBackupStore.dispatch(cancelRestoreDataBase);
+
+                        enableBackground();
+                    };
+                    mRestorationProgressDialog.setMessage("Восстановление");
+
+                    if (mBackupState.backupContentBundle.get().getCostNamesInputStream() == null ||
+                            mBackupState.backupContentBundle.get().getCostValuesInputStream() == null) {
+                        Log.d(TAG, "ActivityBackupData->BAD_BACKUP_CONTENT");
+                        return;
+                    }
+
+                    Action restoreDbFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.RestoreDbFromBackup);
+
+                    Payload payload = new Payload();
+                    payload.set("costNamesStream", mBackupState.backupContentBundle.get().getCostNamesInputStream());
+                    payload.set("costValuesStream", mBackupState.backupContentBundle.get().getCostValuesInputStream());
+                    payload.set("costsDb", DB_Costs.getInstance(this));
+
+                    restoreDbFromBackup.setPayload(payload);
+
+                    mBackupStore.dispatch(restoreDbFromBackup);
+
+                    break;
+                }
+            }
+        });
+
+        mRestoreStatusSubscription = mBackupState.restoreStatus.subscribe(() -> {
+            String restoreStatus = mBackupState.restoreStatus.get().getStatus();
+
+            if (!mRestorationProgressDialog.isShowing()) {
+                Log.d(TAG, "PROGRESS_DIALOG_NOT_SHOWING");
+                return;
+            }
+
+            mRestorationProgressDialog.setMessage(restoreStatus);
+
+            if (restoreStatus.equals(TaskRunner.TaskCompletedStatus) ||
+                    restoreStatus.equals(TaskRunner.TaskInterruptedStatus) ||
+                    restoreStatus.equals(TaskRunner.TaskErrorOccurredStatus)) {
+                mRestorationProgressDialog.dismiss();
+
+                Toast dataRestoredToast;
+                if (restoreStatus.equals(TaskRunner.TaskCompletedStatus)) {
+                    statusTextView.setText(getResources().getString(R.string.abd_dataRestoredSuccessful_string));
+                    dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataRestoredSuccessful_string), Toast.LENGTH_SHORT);
+                } else {
+                    statusTextView.setText(getResources().getString(R.string.abd_dataNotRestored_string));
+                    dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataNotRestored_string), Toast.LENGTH_SHORT);
+                }
+                dataRestoredToast.show();
+
+                enableBackground();
+            }
+        });
+
+        mCreateBackupSubscription = mBackupState.createBackupStatus.subscribe(() -> {
+            String createBackupStatus = mBackupState.createBackupStatus.get().getStatus();
+
+            if (createBackupStatus.equals(CreateBackupStatus.Complete)) {
+                // Поиск доступныз резервных копий начинаем с получения ID корневой папки
+                Action getRootFolderIdAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetRootFolder);
+                getRootFolderIdAction.setPayload(mBackupState.googleDriveServiceBundle.get().getDriveService());
+
+                mBackupStore.dispatch(getRootFolderIdAction);
+            } else {
+                Log.d(TAG, "BAD_CREATE_BACKUP_STATUS: " + createBackupStatus);
+            }
+        });
+    }
+
+    private void unsubscribeAll() {
+        mHasInternetConnectionSubscription.unsubscribe();
+        mRootFolderIdSubscription.unsubscribe();
+        mGoogleDriveServiceBundleSubscription.unsubscribe();
+        mBackupFilesListSubscription.unsubscribe();
+        mBackupContentSubscription.unsubscribe();
+        mRestoreStatusSubscription.unsubscribe();
+        mCreateBackupSubscription.unsubscribe();
+    }
+
+    private String getAppLabel(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        ApplicationInfo applicationInfo = null;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(context.getApplicationInfo().packageName, 0);
+        } catch (final PackageManager.NameNotFoundException e) {
+            Log.d(TAG, CLASS_NAME + "->getAppLabel->NameNotFoundException");
+        }
+
+        return (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "Unknown");
     }
 }

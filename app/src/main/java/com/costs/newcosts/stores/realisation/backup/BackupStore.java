@@ -10,11 +10,13 @@ import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
 import com.costs.newcosts.stores.realisation.backup.types.BackupContentBundle;
+import com.costs.newcosts.stores.realisation.backup.types.CreateBackupStatus;
 import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.realisation.backup.types.RestoreStatus;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
 
@@ -194,6 +196,44 @@ public class BackupStore extends Store {
                 }
 
                 mBackupService.stopTask(type);
+
+                break;
+            }
+
+            case BackupActionsFactory.SetGoogleSignInClient: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.SetGoogleSignInClient->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                GoogleSignInClient client = null;
+                if (payload.get("googleSignInClient") instanceof GoogleSignInClient) {
+                    client = (GoogleSignInClient) payload.get("googleSignInClient");
+                } else {
+                    break;
+                }
+
+                mState.googleSignInClient.set(client);
+
+                break;
+            }
+
+            case BackupActionsFactory.SetCreateBackupStatus: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.SetCreateBackupStatus->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                CreateBackupStatus createBackupStatus = null;
+                if (payload.get("createBackupStatus") instanceof CreateBackupStatus) {
+                    createBackupStatus = (CreateBackupStatus) payload.get("createBackupStatus");
+                } else {
+                    break;
+                }
+
+                mState.createBackupStatus.set(createBackupStatus);
 
                 break;
             }
@@ -421,6 +461,56 @@ public class BackupStore extends Store {
                     dispatch(setRestoreStatus);
                 });
 
+
+                break;
+            }
+
+            case BackupActionsFactory.CreateBackup: {
+                if (!(action.getPayload() instanceof Payload)) {
+                    Log.d(TAG, "BackupActionsFactory.CreateBackup->BAD_PAYLOAD");
+                    break;
+                }
+
+                Payload payload = (Payload) action.getPayload();
+                String rootFolderId = null;
+                Drive googleDriveService = null;
+                DB_Costs costsDb = null;
+                if (payload.get("rootFolderId") instanceof String) {
+                    rootFolderId = (String) payload.get("rootFolderId");
+                } else {
+                    break;
+                }
+                if (payload.get("googleDriveService") instanceof Drive) {
+                    googleDriveService = (Drive) payload.get("googleDriveService");
+                } else {
+                    break;
+                }
+                if (payload.get("costsDb") instanceof DB_Costs) {
+                    costsDb = (DB_Costs) payload.get("costsDb");
+                } else {
+                    break;
+                }
+
+                Action setCreateBackupStatus = mActionsFactory.getAction(BackupActionsFactory.SetCreateBackupStatus);
+
+                Payload setCreateBackupStatusPayload = new Payload();
+                setCreateBackupStatusPayload.set("createBackupStatus", new CreateBackupStatus(CreateBackupStatus.InProgress));
+
+                setCreateBackupStatus.setPayload(setCreateBackupStatusPayload);
+
+                dispatch(setCreateBackupStatus);
+
+                mBackupService.createBackup(costsDb, googleDriveService, rootFolderId, (completed) -> {
+                    if (completed) {
+                        setCreateBackupStatusPayload.set("createBackupStatus", new CreateBackupStatus(CreateBackupStatus.Complete));
+                    } else {
+                        setCreateBackupStatusPayload.set("createBackupStatus", new CreateBackupStatus(CreateBackupStatus.NotComplete));
+                    }
+
+                    setCreateBackupStatus.setPayload(setCreateBackupStatusPayload);
+
+                    dispatch(setCreateBackupStatus);
+                });
 
                 break;
             }

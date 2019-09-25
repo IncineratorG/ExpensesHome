@@ -31,6 +31,7 @@ public class TaskRunner {
     public static final int GetBackupListTask = 2;
     public static final int GetRootFolderTask = 3;
     public static final int RestoreDataBaseTask = 4;
+    public static final int CreateBackupTask = 5;
 
 
     public TaskRunner() {
@@ -49,7 +50,6 @@ public class TaskRunner {
     @SuppressWarnings("unchecked")
     public void runTask(AsyncTask task) {
         if (mCurrentTask != null && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
-            Log.d(TAG, "HERE");
             mCurrentTask.cancel(true);
         }
 
@@ -88,6 +88,15 @@ public class TaskRunner {
 
             case RestoreDataBaseTask: {
                 if (mCurrentTask instanceof RestoreDataBaseTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    mCurrentTask.cancel(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            case CreateBackupTask: {
+                if (mCurrentTask instanceof CreateBackupTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
                     mCurrentTask.cancel(true);
                     return true;
                 } else {
