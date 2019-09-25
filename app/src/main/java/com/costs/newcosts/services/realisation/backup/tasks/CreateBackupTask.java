@@ -76,12 +76,23 @@ public class CreateBackupTask extends AsyncTask<Object, Object, Object> {
             File fileMetadata = new File();
             fileMetadata.setName(mRootFolderName);
             fileMetadata.setParents(Collections.singletonList("appDataFolder"));
-            java.io.File filePath = new java.io.File(mRootFolderName);
-            FileContent mediaContent = new FileContent("application/json", filePath);
-            File file = mGoogleDriveService.files().create(fileMetadata, mediaContent)
+            fileMetadata.setMimeType("application/vnd.google-apps.folder");
+
+            File file = mGoogleDriveService.files().create(fileMetadata)
                     .setFields("id")
                     .execute();
-            System.out.println("File ID: " + file.getId());
+            System.out.println("Folder ID: " + file.getId());
+
+//            File fileMetadata = new File();
+//            fileMetadata.setName(mRootFolderName);
+//            fileMetadata.setParents(Collections.singletonList("appDataFolder"));
+//            fileMetadata.setMimeType("application/vnd.google-apps.folder");
+//            java.io.File filePath = new java.io.File(mRootFolderName);
+//            FileContent mediaContent = new FileContent("application/vnd.google-apps.folder", filePath);
+//            File file = mGoogleDriveService.files().create(fileMetadata, mediaContent)
+//                    .setFields("id")
+//                    .execute();
+//            System.out.println("File ID: " + file.getId());
         } catch (IOException e) {
             Log.d(TAG, e.toString());
         }
