@@ -66,13 +66,14 @@ public class BackupStore_v2 extends Store {
             }
 
             case BackupActionsFactory_v2.SetDriveServiceBundle: {
-                setDriveServiceBundle(action);
+                setDriveServiceBundleReducer(action);
                 break;
             }
 
-//            default: {
-//                Log.d(TAG, "BackupStore_v2.reduce()->UNKNOWN_ACTION_TYPE: " + action.getType());
-//            }
+            case BackupActionsFactory_v2.SetBackupData: {
+                setBackupDataReducer(action);
+                break;
+            }
         }
     }
 
@@ -84,9 +85,10 @@ public class BackupStore_v2 extends Store {
                 break;
             }
 
-//            default: {
-//                Log.d(TAG, "BackupStore_v2.effect()->UNKNOWN_ACTION_TYPE: " + action.getType());
-//            }
+            case BackupActionsFactory_v2.GetBackupData: {
+                getBackupDataEffect(action);
+                break;
+            }
         }
     }
 
@@ -134,7 +136,7 @@ public class BackupStore_v2 extends Store {
         mState.googleSignInClient.set(client);
     }
 
-    private void setDriveServiceBundle(Action action) {
+    private void setDriveServiceBundleReducer(Action action) {
         if (!(action.getPayload() instanceof DriveServiceBundle)) {
             Log.d(TAG, "BackupStore_v2.SetDriveServiceBundle->BAD_PAYLOAD");
             return;
@@ -143,6 +145,10 @@ public class BackupStore_v2 extends Store {
         DriveServiceBundle driveServiceBundle = (DriveServiceBundle) action.getPayload();
 
         mState.driveServiceBundle.set(driveServiceBundle);
+    }
+
+    private void setBackupDataReducer(Action action) {
+
     }
 
 
@@ -200,5 +206,9 @@ public class BackupStore_v2 extends Store {
 
                     dispatch(setDriveServiceBundleAction);
                 }));
+    }
+
+    private void getBackupDataEffect(Action action) {
+
     }
 }

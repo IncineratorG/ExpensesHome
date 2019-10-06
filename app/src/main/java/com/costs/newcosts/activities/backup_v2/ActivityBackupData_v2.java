@@ -98,8 +98,6 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_backup_data);
 
-        Log.d(TAG, "HERE");
-
         calendar = new GregorianCalendar();
 
         linearLayoutManager = new LinearLayoutManager(this);
@@ -268,8 +266,17 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         mHasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
             if (!mBackupState.hasInternetConnection.get()) {
                 statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
+
+                createBackupDataButton.setEnabled(false);
+                createBackupDataButton.setBackgroundResource(R.drawable.keyboard_buttons_custom);
+                createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData_v2.this, R.color.lightGrey));
             } else {
                 statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
+
+                createBackupDataButton.setEnabled(true);
+                createBackupDataButton.setBackgroundResource(R.drawable.keyboard_buttons_custom);
+                createBackupDataButton.setTextColor(getResources().getColorStateList(R.color.button_text_color));
+
             }
         });
 
@@ -279,6 +286,11 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
             switch (mBackupState.driveServiceBundle.get().getDriveServiceStatus()) {
                 case DriveServiceBundle.Set: {
                     mProgressDialog.dismiss();
+
+                    // Получаем данные резервной копии.
+                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    mBackupStore.dispatch(getBackupData);
+
                     break;
                 }
 

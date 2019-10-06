@@ -6,6 +6,7 @@ import com.costs.newcosts.stores.realisation.backup_v2.actions.BuildGoogleDriveS
 import com.costs.newcosts.stores.realisation.backup_v2.actions.CheckInternetConnectionAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.ClearStoreAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.GetBackupDataAction;
+import com.costs.newcosts.stores.realisation.backup_v2.actions.SetBackupDataAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetDriveServiceBundleAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetGoogleSignInClientAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetSignInAction;
@@ -21,6 +22,8 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
     public static final int SetDriveServiceBundle = 5;
     public static final int ClearStore = 6;
     public static final int GetBackupData = 7;
+    public static final int SetBackupData = 8;
+
 
     @Override
     public Action getAction(int type) {
@@ -51,6 +54,10 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
 
             case GetBackupData: {
                 return new GetBackupDataAction();
+            }
+
+            case SetBackupData: {
+                return new SetBackupDataAction();
             }
         }
 
