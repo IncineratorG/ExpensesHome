@@ -1,0 +1,26 @@
+package com.costs.newcosts.stores.realisation.backup_v2;
+
+import com.costs.newcosts.common.types.reactive.realisation.ObservableProperty;
+import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+
+/**
+ * TODO: Add a class header comment
+ */
+public class BackupState_v2 implements com.costs.newcosts.stores.abstraction.State {
+    public ObservableProperty<Boolean> hasInternetConnection = new ObservableProperty<>(false);
+    public ObservableProperty<Boolean> signedIn = new ObservableProperty<>(false);
+    public ObservableProperty<DriveServiceBundle> driveServiceBundle = new ObservableProperty<>();
+    public ObservableProperty<GoogleSignInClient> googleSignInClient = new ObservableProperty<>();
+
+
+//    public ObservableProperty<CreateBackupStatus> createBackupStatus = new ObservableProperty<>();
+//    public ObservableProperty<RestoreStatus> restoreStatus = new ObservableProperty<>();
+//    public ObservableProperty<BackupContentBundle> backupContentBundle = new ObservableProperty<>();
+//    public ObservableProperty<GoogleSignInClient> googleSignInClient = new ObservableProperty<>();
+//    public ObservableProperty<DriveServiceBundle> googleDriveServiceBundle = new ObservableProperty<>();
+//    public ObservableProperty<Boolean> hasInternetConnection = new ObservableProperty<>();
+//    public ObservableProperty<Boolean> signedIn = new ObservableProperty<>();
+//    public ObservableProperty<String> rootFolderId = new ObservableProperty<>();
+//    public ObservableProperty<FileList> backupFilesList = new ObservableProperty<>();
+}

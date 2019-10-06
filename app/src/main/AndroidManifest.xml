@@ -36,6 +36,11 @@
             android:theme="@style/CustomAppStyle"/>
 
         <activity
+            android:name=".activities.backup_v2.ActivityBackupData_v2"
+            android:screenOrientation="portrait"
+            android:theme="@style/CustomAppStyle"/>
+
+        <activity
             android:name=".ActivitySmsExpensesReader"
             android:screenOrientation="portrait"
             android:theme="@style/CustomAppStyle"/>

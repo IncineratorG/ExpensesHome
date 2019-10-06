@@ -2,6 +2,7 @@ package com.costs.newcosts.stores.realisation;
 
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.realisation.backup.BackupStore;
+import com.costs.newcosts.stores.realisation.backup_v2.BackupStore_v2;
 
 /**
  * TODO: Add a class header comment
@@ -9,12 +10,15 @@ import com.costs.newcosts.stores.realisation.backup.BackupStore;
 public class Stores {
     private static Stores mInstance = null;
     private com.costs.newcosts.stores.realisation.backup.BackupStore mBackupStore;
+    private com.costs.newcosts.stores.realisation.backup_v2.BackupStore_v2 mBackupStore_v2;
 
     public static final int BackupStore = 1;
+    public static final int BackupStore_v2 = 2;
 
 
     public Stores() {
         mBackupStore = new BackupStore();
+        mBackupStore_v2 = new BackupStore_v2();
     }
 
     public static synchronized Stores getInstance() {
@@ -30,6 +34,10 @@ public class Stores {
         switch (type) {
             case BackupStore: {
                 return mBackupStore;
+            }
+
+            case BackupStore_v2: {
+                return mBackupStore_v2;
             }
         }
 
