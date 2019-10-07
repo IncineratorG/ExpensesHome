@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.services.realisation.backup.callbacks.CreateBackupCompleted;
+import com.costs.newcosts.services.realisation.backup.callbacks.CreateDeviceBackupCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupDataCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupFolderContentCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupListCompleted;
@@ -16,6 +17,7 @@ import com.costs.newcosts.services.realisation.backup.callbacks.GetRootFolderCom
 import com.costs.newcosts.services.realisation.backup.callbacks.RestoreDataBaseFromBackupProgress;
 import com.costs.newcosts.services.realisation.backup.callbacks.RestoreDataBaseProgress;
 import com.costs.newcosts.services.realisation.backup.tasks.CreateBackupTask;
+import com.costs.newcosts.services.realisation.backup.tasks.CreateDeviceBackupTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupDataTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupFolderContentTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupListTask;
@@ -122,14 +124,17 @@ public class BackupService {
     }
 
     public void restoreDataBaseFromBackup(Drive googleDriveService, String backupFolderId, DB_Costs costsDb, RestoreDataBaseFromBackupProgress progressCallback) {
-        final String METHOD_NAME = ".restoreDataBaseFromBackup()";
-
-        Log.d(TAG, CLASS_NAME + METHOD_NAME);
-
         RestoreDataBaseFromBackupTask restoreDataBaseFromBackupTask = new RestoreDataBaseFromBackupTask(googleDriveService,
                                                                                                         backupFolderId,
                                                                                                         costsDb,
                                                                                                         progressCallback);
         mTaskRunner.runTask(restoreDataBaseFromBackupTask);
+    }
+
+    public void createDeviceBackup(Drive googleDriveService, String rootFolderId, DB_Costs costsDb, CreateDeviceBackupCompleted callback) {
+        Log.d(TAG, CLASS_NAME + ".createDeviceBackup()");
+
+        CreateDeviceBackupTask createDeviceBackupTask = new CreateDeviceBackupTask(googleDriveService, rootFolderId, costsDb, callback);
+        mTaskRunner.runTask(createDeviceBackupTask);
     }
 }

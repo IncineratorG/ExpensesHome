@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.costs.newcosts.DB_Costs;
-import com.costs.newcosts.activities.backup.ActivityBackupData;
 import com.costs.newcosts.activities.backup.DataUnitBackupFolder;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
@@ -13,7 +12,9 @@ import com.costs.newcosts.stores.abstraction.ActionsFactory;
 import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.common.Payload;
+import com.costs.newcosts.stores.realisation.backup.types.CreateBackupStatus;
 import com.costs.newcosts.stores.realisation.backup_v2.types.BackupData;
+import com.costs.newcosts.stores.realisation.backup_v2.types.CreateDeviceBackupStatus;
 import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
 import com.costs.newcosts.stores.realisation.backup_v2.types.RestoreStatus;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -96,6 +97,11 @@ public class BackupStore_v2 extends Store {
                 setRestoreStatusReducer(action);
                 break;
             }
+
+            case BackupActionsFactory_v2.SetCreateDeviceBackupStatus: {
+                setCreateDeviceBackupStatus(action);
+                break;
+            }
         }
     }
 
@@ -114,6 +120,11 @@ public class BackupStore_v2 extends Store {
 
             case BackupActionsFactory_v2.RestoreFromBackup: {
                 restoreFromBackupEffect(action);
+                break;
+            }
+
+            case BackupActionsFactory_v2.CreateDeviceBackup: {
+                createDeviceBackupEffect(action);
                 break;
             }
         }
@@ -212,6 +223,24 @@ public class BackupStore_v2 extends Store {
         }
 
         mState.restoreStatus.set(restoreStatus);
+    }
+
+    private void setCreateDeviceBackupStatus(Action action) {
+        if (!(action.getPayload() instanceof Payload)) {
+            Log.d(TAG, "BackupStore_v2.setCreateDeviceBackupStatus()->BAD_PAYLOAD");
+            return;
+        }
+
+        Payload payload = (Payload) action.getPayload();
+        CreateDeviceBackupStatus createDeviceBackupStatus = null;
+        if (payload.get("createDeviceBackupStatus") instanceof CreateDeviceBackupStatus) {
+            createDeviceBackupStatus = (CreateDeviceBackupStatus) payload.get("createDeviceBackupStatus");
+        } else {
+            Log.d(TAG, "BackupStore_v2.setCreateDeviceBackupStatus()->BAD_PAYLOAD_DATA");
+            return;
+        }
+
+        mState.createDeviceBackupStatus.set(createDeviceBackupStatus);
     }
 
 
@@ -343,8 +372,6 @@ public class BackupStore_v2 extends Store {
         }
 
         mBackupService.restoreDataBaseFromBackup(googleDriveService, backupFolderId, costsDb, (progress) -> {
-//            Log.d(TAG, "BackupStore_v2.restoreFromBackupEffect()->PROGRESS: " + progress);
-
             Action setRestoreStatus = mActionsFactory.getAction(BackupActionsFactory_v2.SetRestoreStatus);
 
             Payload restoreStatusPayload = new Payload();
@@ -353,6 +380,57 @@ public class BackupStore_v2 extends Store {
             setRestoreStatus.setPayload(restoreStatusPayload);
 
             dispatch(setRestoreStatus);
+        });
+    }
+
+    private void createDeviceBackupEffect(Action action) {
+        Log.d(TAG, CLASS_NAME + ".createDeviceBackupEffect()");
+
+        if (!(action.getPayload() instanceof Payload)) {
+            Log.d(TAG, "BackupStore_v2.createDeviceBackupEffect()->BAD_PAYLOAD");
+            return;
+        }
+
+        Payload payload = (Payload) action.getPayload();
+        Drive googleDriveService = null;
+        String rootFolderId = null;
+        DB_Costs costsDb = null;
+        if (payload.get("googleDriveService") instanceof Drive) {
+            googleDriveService = (Drive) payload.get("googleDriveService");
+        } else {
+            Log.d(TAG, "BackupStore_v2.createDeviceBackupEffect()->BAD_PAYLOAD_DATA");
+            return;
+        }
+        if (payload.get("rootFolderId") instanceof String) {
+            rootFolderId = (String) payload.get("rootFolderId");
+        } else {
+            Log.d(TAG, "BackupStore_v2.createDeviceBackupEffect()->BAD_PAYLOAD_DATA");
+            return;
+        }
+        if (payload.get("costsDb") instanceof DB_Costs) {
+            costsDb = (DB_Costs) payload.get("costsDb");
+        } else {
+            Log.d(TAG, "BackupStore_v2.createDeviceBackupEffect()->BAD_PAYLOAD_DATA");
+            return;
+        }
+
+        Payload setCreateDeviceBackupStatusPayload = new Payload();
+        setCreateDeviceBackupStatusPayload.set("createDeviceBackupStatus", new CreateDeviceBackupStatus(CreateDeviceBackupStatus.InProgress));
+
+        Action setCreateDeviceBackupStatus = mActionsFactory.getAction(BackupActionsFactory_v2.SetCreateDeviceBackupStatus);
+        setCreateDeviceBackupStatus.setPayload(setCreateDeviceBackupStatusPayload);
+
+        dispatch(setCreateDeviceBackupStatus);
+
+        mBackupService.createDeviceBackup(googleDriveService, rootFolderId, costsDb, (complete) -> {
+            if (complete) {
+                setCreateDeviceBackupStatusPayload.set("createDeviceBackupStatus", new CreateDeviceBackupStatus(CreateDeviceBackupStatus.Complete));
+            } else {
+                setCreateDeviceBackupStatusPayload.set("createDeviceBackupStatus", new CreateDeviceBackupStatus(CreateDeviceBackupStatus.NotComplete));
+            }
+            setCreateDeviceBackupStatus.setPayload(setCreateDeviceBackupStatusPayload);
+
+            dispatch(setCreateDeviceBackupStatus);
         });
     }
 }

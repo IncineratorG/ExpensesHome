@@ -24,6 +24,7 @@ public class TaskRunner {
     public static final int CreateBackupTask = 5;
     public static final int GetBackupDataTask = 6;
     public static final int RestoreDataBaseFromBackupTask = 7;
+    public static final int CreateDeviceBackupTask = 8;
 
 
     public TaskRunner() {
@@ -118,6 +119,15 @@ public class TaskRunner {
                 }
             }
 
+            case CreateDeviceBackupTask: {
+                if (mCurrentTask instanceof CreateDeviceBackupTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    mCurrentTask.cancel(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
             default: {
                 Log.d(TAG, "UNKNOWN_TASK_TYPE: " + String.valueOf(type));
             }
@@ -145,6 +155,8 @@ public class TaskRunner {
             return GetBackupDataTask;
         } else if (task instanceof RestoreDataBaseFromBackupTask) {
             return RestoreDataBaseFromBackupTask;
+        } else if (task instanceof CreateDeviceBackupTask) {
+            return CreateDeviceBackupTask;
         }
 
         return -1;

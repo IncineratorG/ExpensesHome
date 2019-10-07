@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,7 +25,6 @@ import com.costs.newcosts.ActivityMainWithFragments;
 import com.costs.newcosts.Constants;
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.R;
-import com.costs.newcosts.activities.backup.ActivityBackupData;
 import com.costs.newcosts.activities.backup.AdapterActivityBackupDataRecyclerView;
 import com.costs.newcosts.activities.backup.DataUnitBackupFolder;
 import com.costs.newcosts.common.types.reactive.abstraction.Executable;
@@ -39,13 +37,12 @@ import com.costs.newcosts.stores.realisation.Stores;
 import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
 import com.costs.newcosts.stores.realisation.backup_v2.BackupState_v2;
 import com.costs.newcosts.stores.realisation.backup_v2.types.BackupData;
+import com.costs.newcosts.stores.realisation.backup_v2.types.CreateDeviceBackupStatus;
 import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.api.services.drive.DriveScopes;
 
 import java.util.ArrayList;
@@ -94,7 +91,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     private Subscription mRootFolderIdSubscription;
     private Subscription mBackupContentSubscription;
     private Subscription mRestoreStatusSubscription;
-    private Subscription mCreateBackupSubscription;
+    private Subscription mCreateDeviceBackupSubscription;
 
     private AlertDialog mRestorationProgressDialog;
     private Executable mRestorationDialogCancelAction;
@@ -117,9 +114,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         createBackupDataButton = (Button) findViewById(R.id.backup_data_backup_button);
         createBackupDataButton.setEnabled(false);
         createBackupDataButton.setTextColor(ContextCompat.getColor(this, R.color.lightGrey));
-        createBackupDataButton.setOnClickListener((v) -> {
-//            createDeviceBackup();
-        });
+        createBackupDataButton.setOnClickListener((v) -> createDeviceBackup());
 
         // При нажатии стрелки назад - возвращаемся к предыдущему экрану
         arrowBackImageView = (ImageView) findViewById(R.id.backup_data_arrow_back_imageview);
@@ -344,8 +339,8 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                         mProgressDialog.dismiss();
                     }
 
-                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
-                    mProgressDialog.setMessage("Подготовка");
+//                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
+                    mProgressDialog.setMessage(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
                     if (!isFinishing()) {
                         mProgressDialog.show();
                     }
@@ -373,8 +368,35 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                 }
 
                 default: {
-                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
+//                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
                     mProgressDialog.setMessage(restoreStatus);
+                }
+            }
+        });
+
+        mCreateDeviceBackupSubscription = mBackupState.createDeviceBackupStatus.subscribe(() -> {
+            Log.d(TAG, CLASS_NAME + METHOD_NAME + "->CREATE_DEVICE_BACKUP_STATUS: " + mBackupState.createDeviceBackupStatus.get().getStatus());
+
+            final String createDeviceBackupStatus = mBackupState.createDeviceBackupStatus.get().getStatus();
+
+            switch (createDeviceBackupStatus) {
+                case CreateDeviceBackupStatus.Complete: {
+                    mProgressDialog.dismiss();
+                    break;
+                }
+
+                case CreateDeviceBackupStatus.InProgress: {
+                    mProgressDialog.setTitle("");
+                    mProgressDialog.setMessage("Создание резервной копии");
+                    if (!isFinishing()) {
+                        mProgressDialog.show();
+                    }
+                    break;
+                }
+
+                case CreateDeviceBackupStatus.NotComplete: {
+                    mProgressDialog.dismiss();
+                    break;
                 }
             }
         });
@@ -385,6 +407,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         mGoogleDriveServiceBundleSubscription.unsubscribe();
         mBackupDataSubscription.unsubscribe();
         mRestoreStatusSubscription.unsubscribe();
+        mCreateDeviceBackupSubscription.unsubscribe();
     }
 
     // При нажатии на элемент списка резервных копий - отображаем диалоговое окно,
@@ -484,6 +507,20 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         restoreFromBackup.setPayload(payload);
 
         mBackupStore.dispatch(restoreFromBackup);
+    }
+
+    private void createDeviceBackup() {
+        Log.d(TAG, CLASS_NAME + ".createDeviceBackup()");
+
+        Payload payload = new Payload();
+        payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
+        payload.set("rootFolderId", mBackupState.backupData.get().getRootFolderId());
+        payload.set("costsDb", DB_Costs.getInstance(this));
+
+        Action createDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.CreateDeviceBackup);
+        createDeviceBackup.setPayload(payload);
+
+        mBackupStore.dispatch(createDeviceBackup);
     }
 
     private void enableBackground() {
