@@ -9,33 +9,43 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.costs.newcosts.ActivityMainWithFragments;
+import com.costs.newcosts.Constants;
+import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.R;
+import com.costs.newcosts.activities.backup.ActivityBackupData;
 import com.costs.newcosts.activities.backup.AdapterActivityBackupDataRecyclerView;
 import com.costs.newcosts.activities.backup.DataUnitBackupFolder;
 import com.costs.newcosts.common.types.reactive.abstraction.Executable;
 import com.costs.newcosts.common.types.reactive.realisation.Subscription;
+import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.realisation.Stores;
 import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
 import com.costs.newcosts.stores.realisation.backup_v2.BackupState_v2;
+import com.costs.newcosts.stores.realisation.backup_v2.types.BackupData;
 import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.api.services.drive.DriveScopes;
 
 import java.util.ArrayList;
@@ -48,7 +58,7 @@ import java.util.List;
  */
 public class ActivityBackupData_v2 extends AppCompatActivity {
     private static final String TAG = "tag";
-    private static final String CLASS_NAME = "ActivityBackupData";
+    private static final String CLASS_NAME = "ActivityBackupData_v2";
 
     private ImageView arrowBackImageView;
 
@@ -78,9 +88,9 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     private Store mBackupStore;
     private BackupState_v2 mBackupState;
 
-    private Subscription mBackupFilesListSubscription;
     private Subscription mHasInternetConnectionSubscription;
     private Subscription mGoogleDriveServiceBundleSubscription;
+    private Subscription mBackupDataSubscription;
     private Subscription mRootFolderIdSubscription;
     private Subscription mBackupContentSubscription;
     private Subscription mRestoreStatusSubscription;
@@ -111,24 +121,13 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
 //            createDeviceBackup();
         });
 
-
         // При нажатии стрелки назад - возвращаемся к предыдущему экрану
         arrowBackImageView = (ImageView) findViewById(R.id.backup_data_arrow_back_imageview);
-        arrowBackImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                returnToPreviousActivity();
-            }
-        });
+        arrowBackImageView.setOnClickListener((v) -> returnToPreviousActivity());
 
         // Открываем диалоговое окно, в котором можно выбрать аккаунт Google
         selectGoogleAccountImageView = (ImageView) findViewById(R.id.backup_data_account_imageview);
-        selectGoogleAccountImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                signOut();
-            }
-        });
+        selectGoogleAccountImageView.setOnClickListener((v) -> signOut());
 
         statusTextView = (TextView) findViewById(R.id.backup_data_status_textview);
         statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
@@ -143,22 +142,14 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         // Подписываемся на необходимые параметры хранилища.
         setSubscriptions();
 
-        mProgressDialog = new ProgressDialog(this);
+        // Все кнопки, кроме кнопки "Назад" делаем неактивными до момента получения данных обфайлах резервных копий.
+        disableBackground();
 
-//        AlertDialog.Builder infoDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
-//        infoDialogBuilder.setCancelable(false);
-//        infoDialogBuilder.setTitle("No Title");
-//        infoDialogBuilder.setNegativeButton(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Cancel_string), new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                Log.d(TAG, "DIALOG_CANCEL_BUTTON_CLICKED");
-//                if (mInfoDialogCancelAction != null) {
-//                    mInfoDialogCancelAction.execute();
-//                }
-//            }
-//        });
-//
-//        mInfoDialog = infoDialogBuilder.create();
+        mProgressDialog = new ProgressDialog(ActivityBackupData_v2.this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Cancel_string), (d, w) -> {
+            mBackupStore.dispatch(mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.StopCurrentAsyncTask));
+        });
     }
 
     @Override
@@ -178,8 +169,6 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
             if (!mBackupState.signedIn.get()) {
                 requestSignIn();
             }
-        } else {
-            Log.d(TAG, "NO_INTERNET_CONNECTION");
         }
     }
 
@@ -232,6 +221,14 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         startActivityForResult(client.getSignInIntent(), REQUEST_CODE_SIGN_IN);
     }
 
+    private void signOut() {
+        disableBackground();
+
+        mBackupState.googleSignInClient.get().signOut().addOnCompleteListener((task) -> {
+            requestSignIn();
+        });
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         switch (requestCode) {
             case REQUEST_CODE_SIGN_IN:
@@ -263,40 +260,39 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     }
 
     private void setSubscriptions() {
+        final String METHOD_NAME = ".setSubscriptions()";
+
         mHasInternetConnectionSubscription = mBackupState.hasInternetConnection.subscribe(() -> {
             if (!mBackupState.hasInternetConnection.get()) {
                 statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
-
-                createBackupDataButton.setEnabled(false);
-                createBackupDataButton.setBackgroundResource(R.drawable.keyboard_buttons_custom);
-                createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData_v2.this, R.color.lightGrey));
             } else {
                 statusTextView.setText(getResources().getString(R.string.abd_statusTextView_connectionAcquired_string));
-
-                createBackupDataButton.setEnabled(true);
-                createBackupDataButton.setBackgroundResource(R.drawable.keyboard_buttons_custom);
-                createBackupDataButton.setTextColor(getResources().getColorStateList(R.color.button_text_color));
-
             }
         });
 
         mGoogleDriveServiceBundleSubscription = mBackupState.driveServiceBundle.subscribe(() -> {
-            Log.d(TAG, mBackupState.driveServiceBundle.get().getDriveServiceStatus());
-
             switch (mBackupState.driveServiceBundle.get().getDriveServiceStatus()) {
                 case DriveServiceBundle.Set: {
                     mProgressDialog.dismiss();
 
                     // Получаем данные резервной копии.
+                    Payload payload = new Payload();
+                    payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
+
                     Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    getBackupData.setPayload(payload);
+
                     mBackupStore.dispatch(getBackupData);
 
                     break;
                 }
 
                 case DriveServiceBundle.Setting: {
+                    mProgressDialog.setTitle(null);
                     mProgressDialog.setMessage("Подключение к серверам Google");
-                    mProgressDialog.show();
+                    if (!isFinishing()) {
+                        mProgressDialog.show();
+                    }
                     break;
                 }
 
@@ -306,11 +302,211 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                 }
             }
         });
+
+        mBackupDataSubscription = mBackupState.backupData.subscribe(() -> {
+            switch (mBackupState.backupData.get().getBackupDataStatus()) {
+                case BackupData.Set: {
+                    mProgressDialog.dismiss();
+
+                    // Отображаем полученный список резервных копий
+                    existingDeviceBackupFolders = mBackupState.backupData.get().getDeviceBackupFolders();
+                    backupListRecyclerView.setLayoutManager(linearLayoutManager);
+                    backupDataRecyclerViewAdapter = new AdapterActivityBackupDataRecyclerView(ActivityBackupData_v2.this, existingDeviceBackupFolders);
+                    backupListRecyclerView.setAdapter(backupDataRecyclerViewAdapter);
+
+                    enableBackground();
+
+                    break;
+                }
+
+                case BackupData.Setting: {
+                    mProgressDialog.setTitle("");
+                    mProgressDialog.setMessage("Получение резервных копий");
+                    if (!isFinishing()) {
+                        mProgressDialog.show();
+                    }
+                    break;
+                }
+
+                case BackupData.NotSet: {
+                    mProgressDialog.dismiss();
+                    break;
+                }
+            }
+        });
+
+        mRestoreStatusSubscription = mBackupState.restoreStatus.subscribe(() -> {
+            final String restoreStatus = mBackupState.restoreStatus.get().getStatus();
+
+            switch (restoreStatus) {
+                case TaskRunner.TaskStartedStatus: {
+                    if (mProgressDialog.isShowing()) {
+                        mProgressDialog.dismiss();
+                    }
+
+                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
+                    mProgressDialog.setMessage("Подготовка");
+                    if (!isFinishing()) {
+                        mProgressDialog.show();
+                    }
+                    break;
+                }
+
+                case TaskRunner.TaskCompletedStatus:
+                case TaskRunner.TaskInterruptedStatus:
+                case TaskRunner.TaskErrorOccurredStatus: {
+                    mProgressDialog.dismiss();
+
+                    Toast dataRestoredToast;
+                    if (restoreStatus.equals(TaskRunner.TaskCompletedStatus)) {
+                        statusTextView.setText(getResources().getString(R.string.abd_dataRestoredSuccessful_string));
+                        dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataRestoredSuccessful_string), Toast.LENGTH_SHORT);
+                    } else {
+                        statusTextView.setText(getResources().getString(R.string.abd_dataNotRestored_string));
+                        dataRestoredToast = Toast.makeText(this, getResources().getString(R.string.abd_dataNotRestored_string), Toast.LENGTH_SHORT);
+                    }
+                    dataRestoredToast.show();
+
+                    enableBackground();
+
+                    break;
+                }
+
+                default: {
+                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
+                    mProgressDialog.setMessage(restoreStatus);
+                }
+            }
+        });
     }
 
     private void unsubscribeAll() {
         mHasInternetConnectionSubscription.unsubscribe();
         mGoogleDriveServiceBundleSubscription.unsubscribe();
+        mBackupDataSubscription.unsubscribe();
+        mRestoreStatusSubscription.unsubscribe();
+    }
+
+    // При нажатии на элемент списка резервных копий - отображаем диалоговое окно,
+    // предлагающее восстановить данные из резервной копии или удалить выбранную резервную копию
+    private void onBackupItemClick(final int position) {
+        DataUnitBackupFolder selectedBackupItem = existingDeviceBackupFolders.get(position);
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(selectedBackupItem.getMilliseconds());
+
+        AlertDialog.Builder chosenBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
+        LayoutInflater inflater = LayoutInflater.from(ActivityBackupData_v2.this);
+        View dialogView = inflater.inflate(R.layout.edit_cost_value_dialog, null);
+        chosenBackupItemDialogBuilder.setView(dialogView);
+
+        // Устанавливаем дату выбранной резервной копии
+        TextView dateTextView = (TextView) dialogView.findViewById(R.id.edit_cost_value_dialog_costDate);
+        dateTextView.setText(Constants.DAY_NAMES[calendar.get(Calendar.DAY_OF_WEEK)] + ", " +
+                selectedBackupItem.getDay() + " " +
+                Constants.DECLENSION_MONTH_NAMES[selectedBackupItem.getMonth()] + " " +
+                selectedBackupItem.getYear() + ", " +
+                calendar.get(Calendar.HOUR_OF_DAY) + ":" +
+                calendar.get(Calendar.MINUTE));
+
+        // Устанавливаем название устройства, на котром была создана выбранная резервная копия
+        TextView descriptionTextView = (TextView) dialogView.findViewById(R.id.edit_cost_value_dialog_costName);
+        descriptionTextView.setText(selectedBackupItem.getDeviceManufacturer() + " " +
+                selectedBackupItem.getDeviceModel());
+
+        // Скрываем ненужные элементы
+        TextView invisTextView_1 = (TextView) dialogView.findViewById(R.id.edit_cost_value_dialog_costValue);
+        invisTextView_1.setVisibility(View.GONE);
+        TextView invisTextView_2 = (TextView) dialogView.findViewById(R.id.edit_cost_value_dialog_costNote);
+        invisTextView_2.setVisibility(View.GONE);
+
+        // Запускаем диалоговое окно
+        final AlertDialog chosenBackupItemDialog = chosenBackupItemDialogBuilder.create();
+        chosenBackupItemDialog.show();
+
+        // Устанавливаем слушатели на кнопки созданного диалогового окна
+        // При нажатии кнопки "Восстановить" появляется диалоговое окно, запрашивающее подтверждение восстановления
+        Button restoreButton = (Button) dialogView.findViewById(R.id.edit_cost_value_dialog_editButton);
+        restoreButton.setText(getResources().getString(R.string.abd_restoreButton_string));
+        restoreButton.setOnClickListener((v) -> {
+            chosenBackupItemDialog.dismiss();
+
+            AlertDialog.Builder restoreFromChosenBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
+            restoreFromChosenBackupItemDialogBuilder.setTitle(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_Title_string));
+            restoreFromChosenBackupItemDialogBuilder.setMessage(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_Message_string));
+            restoreFromChosenBackupItemDialogBuilder.setPositiveButton(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_continue_button_string), (d, w) -> {
+                disableBackground();
+                restoreDataFromBackup(position);
+            });
+            restoreFromChosenBackupItemDialogBuilder.setNegativeButton(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_cancel_button_string), null);
+
+            AlertDialog restoreFromChosenBackupItemDialog = restoreFromChosenBackupItemDialogBuilder.create();
+            restoreFromChosenBackupItemDialog.show();
+        });
+
+        // При нажатии кнопки "Удалить" появляется диалоговое окно, запрашивающее подтверждение удаления
+        Button deleteButton = (Button) dialogView.findViewById(R.id.edit_cost_value_dialog_deleteButton);
+        deleteButton.setText(getResources().getString(R.string.abd_deleteButton_string));
+        deleteButton.setOnClickListener((v) -> {
+            chosenBackupItemDialog.dismiss();
+
+            AlertDialog.Builder deleteBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
+            deleteBackupItemDialogBuilder.setTitle(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_Title_string));
+            deleteBackupItemDialogBuilder.setMessage(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_Message_string));
+            deleteBackupItemDialogBuilder.setPositiveButton(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_delete_button_string), (d, w) -> {
+//                deleteBackupItem(position);
+            });
+            deleteBackupItemDialogBuilder.setNegativeButton(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_cancel_button_string), null);
+
+            AlertDialog deleteBackupItemDialog = deleteBackupItemDialogBuilder.create();
+            deleteBackupItemDialog.show();
+        });
+
+        Button cancelButton = (Button) dialogView.findViewById(R.id.edit_cost_value_dialog_cancelButton);
+        cancelButton.setText(getResources().getString(R.string.abd_cancelButton_string));
+        cancelButton.setOnClickListener((v) -> chosenBackupItemDialog.dismiss());
+    }
+
+    private void restoreDataFromBackup(int position) {
+        if (existingDeviceBackupFolders.size() == 0) {
+            Log.i(TAG, "NO BACKUP FILES FOUND");
+            return;
+        }
+
+        String backupFolderId = existingDeviceBackupFolders.get(position).getDriveId();
+
+        Payload payload = new Payload();
+        payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
+        payload.set("backupFolderId", backupFolderId);
+        payload.set("costsDb", DB_Costs.getInstance(this));
+
+        Action restoreFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.RestoreFromBackup);
+        restoreFromBackup.setPayload(payload);
+
+        mBackupStore.dispatch(restoreFromBackup);
+    }
+
+    private void enableBackground() {
+        if (backupDataRecyclerViewAdapter != null) {
+            backupDataRecyclerViewAdapter.setClickListener((v, p) -> onBackupItemClick(p));
+        }
+
+        createBackupDataButton.setEnabled(true);
+        createBackupDataButton.setBackgroundResource(R.drawable.keyboard_buttons_custom);
+        createBackupDataButton.setTextColor(getResources().getColorStateList(R.color.button_text_color));
+
+        selectGoogleAccountImageView.setEnabled(true);
+    }
+
+    private void disableBackground() {
+        if (backupDataRecyclerViewAdapter != null) {
+            backupDataRecyclerViewAdapter.setClickListener(null);
+        }
+
+        createBackupDataButton.setEnabled(false);
+        createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData_v2.this, R.color.lightGrey));
+
+        selectGoogleAccountImageView.setEnabled(false);
     }
 
     private String getAppLabel(Context context) {

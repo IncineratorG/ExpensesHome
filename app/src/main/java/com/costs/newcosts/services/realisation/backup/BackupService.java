@@ -9,14 +9,18 @@ import android.util.Log;
 
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.services.realisation.backup.callbacks.CreateBackupCompleted;
+import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupDataCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupFolderContentCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupListCompleted;
 import com.costs.newcosts.services.realisation.backup.callbacks.GetRootFolderCompleted;
+import com.costs.newcosts.services.realisation.backup.callbacks.RestoreDataBaseFromBackupProgress;
 import com.costs.newcosts.services.realisation.backup.callbacks.RestoreDataBaseProgress;
 import com.costs.newcosts.services.realisation.backup.tasks.CreateBackupTask;
+import com.costs.newcosts.services.realisation.backup.tasks.GetBackupDataTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupFolderContentTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetBackupListTask;
 import com.costs.newcosts.services.realisation.backup.tasks.GetRootFolderTask;
+import com.costs.newcosts.services.realisation.backup.tasks.RestoreDataBaseFromBackupTask;
 import com.costs.newcosts.services.realisation.backup.tasks.RestoreDataBaseTask;
 import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -37,6 +41,8 @@ import java.util.Collections;
  */
 public class BackupService {
     private static final String TAG = "tag";
+
+    private static final String CLASS_NAME = "BackupService";
 
     private TaskRunner mTaskRunner;
 
@@ -100,5 +106,30 @@ public class BackupService {
 
     public void stopTask(int type) {
         mTaskRunner.stopTask(type);
+    }
+
+    public int stopCurrentTask() {
+        int currentTaskType = mTaskRunner.getCurrentTaskType();
+        mTaskRunner.stopTask(currentTaskType);
+
+        return currentTaskType;
+    }
+
+
+    public void getBackupData(Drive googleDriveService, GetBackupDataCompleted callback) {
+        GetBackupDataTask getBackupDataTask = new GetBackupDataTask(googleDriveService, callback);
+        mTaskRunner.runTask(getBackupDataTask);
+    }
+
+    public void restoreDataBaseFromBackup(Drive googleDriveService, String backupFolderId, DB_Costs costsDb, RestoreDataBaseFromBackupProgress progressCallback) {
+        final String METHOD_NAME = ".restoreDataBaseFromBackup()";
+
+        Log.d(TAG, CLASS_NAME + METHOD_NAME);
+
+        RestoreDataBaseFromBackupTask restoreDataBaseFromBackupTask = new RestoreDataBaseFromBackupTask(googleDriveService,
+                                                                                                        backupFolderId,
+                                                                                                        costsDb,
+                                                                                                        progressCallback);
+        mTaskRunner.runTask(restoreDataBaseFromBackupTask);
     }
 }

@@ -6,10 +6,13 @@ import com.costs.newcosts.stores.realisation.backup_v2.actions.BuildGoogleDriveS
 import com.costs.newcosts.stores.realisation.backup_v2.actions.CheckInternetConnectionAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.ClearStoreAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.GetBackupDataAction;
+import com.costs.newcosts.stores.realisation.backup_v2.actions.RestoreFromBackupAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetBackupDataAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetDriveServiceBundleAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetGoogleSignInClientAction;
+import com.costs.newcosts.stores.realisation.backup_v2.actions.SetRestoreStatusAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetSignInAction;
+import com.costs.newcosts.stores.realisation.backup_v2.actions.StopCurrentAsyncTaskAction;
 
 /**
  * TODO: Add a class header comment
@@ -23,6 +26,9 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
     public static final int ClearStore = 6;
     public static final int GetBackupData = 7;
     public static final int SetBackupData = 8;
+    public static final int StopCurrentAsyncTask = 9;
+    public static final int RestoreFromBackup = 10;
+    public static final int SetRestoreStatus = 11;
 
 
     @Override
@@ -58,6 +64,18 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
 
             case SetBackupData: {
                 return new SetBackupDataAction();
+            }
+
+            case StopCurrentAsyncTask: {
+                return new StopCurrentAsyncTaskAction();
+            }
+
+            case RestoreFromBackup: {
+                return new RestoreFromBackupAction();
+            }
+
+            case SetRestoreStatus: {
+                return new SetRestoreStatusAction();
             }
         }
 
