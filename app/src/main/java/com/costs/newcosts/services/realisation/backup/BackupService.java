@@ -132,8 +132,6 @@ public class BackupService {
     }
 
     public void createDeviceBackup(Drive googleDriveService, String rootFolderId, DB_Costs costsDb, CreateDeviceBackupCompleted callback) {
-        Log.d(TAG, CLASS_NAME + ".createDeviceBackup()");
-
         CreateDeviceBackupTask createDeviceBackupTask = new CreateDeviceBackupTask(googleDriveService, rootFolderId, costsDb, callback);
         mTaskRunner.runTask(createDeviceBackupTask);
     }

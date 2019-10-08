@@ -127,6 +127,11 @@ public class BackupStore_v2 extends Store {
                 createDeviceBackupEffect(action);
                 break;
             }
+
+            case BackupActionsFactory_v2.DeleteDeviceBackup: {
+                deleteDeviceBackupEffect(action);
+                break;
+            }
         }
     }
 
@@ -384,8 +389,6 @@ public class BackupStore_v2 extends Store {
     }
 
     private void createDeviceBackupEffect(Action action) {
-        Log.d(TAG, CLASS_NAME + ".createDeviceBackupEffect()");
-
         if (!(action.getPayload() instanceof Payload)) {
             Log.d(TAG, "BackupStore_v2.createDeviceBackupEffect()->BAD_PAYLOAD");
             return;
@@ -432,5 +435,9 @@ public class BackupStore_v2 extends Store {
 
             dispatch(setCreateDeviceBackupStatus);
         });
+    }
+
+    private void deleteDeviceBackupEffect(Action action) {
+        Log.d(TAG, "BackupStore_v2.deleteDeviceBackupEffect()");
     }
 }

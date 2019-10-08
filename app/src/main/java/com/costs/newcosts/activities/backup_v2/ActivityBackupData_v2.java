@@ -339,7 +339,6 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                         mProgressDialog.dismiss();
                     }
 
-//                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
                     mProgressDialog.setMessage(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
                     if (!isFinishing()) {
                         mProgressDialog.show();
@@ -368,7 +367,6 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                 }
 
                 default: {
-//                    mProgressDialog.setTitle(getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Title_string));
                     mProgressDialog.setMessage(restoreStatus);
                 }
             }
@@ -382,6 +380,16 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
             switch (createDeviceBackupStatus) {
                 case CreateDeviceBackupStatus.Complete: {
                     mProgressDialog.dismiss();
+
+                    // Получаем данные резервной копии.
+                    Payload payload = new Payload();
+                    payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
+
+                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    getBackupData.setPayload(payload);
+
+                    mBackupStore.dispatch(getBackupData);
+
                     break;
                 }
 
@@ -477,7 +485,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
             deleteBackupItemDialogBuilder.setTitle(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_Title_string));
             deleteBackupItemDialogBuilder.setMessage(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_Message_string));
             deleteBackupItemDialogBuilder.setPositiveButton(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_delete_button_string), (d, w) -> {
-//                deleteBackupItem(position);
+                deleteBackupItem(position);
             });
             deleteBackupItemDialogBuilder.setNegativeButton(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_cancel_button_string), null);
 
@@ -510,8 +518,6 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     }
 
     private void createDeviceBackup() {
-        Log.d(TAG, CLASS_NAME + ".createDeviceBackup()");
-
         Payload payload = new Payload();
         payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
         payload.set("rootFolderId", mBackupState.backupData.get().getRootFolderId());
@@ -521,6 +527,25 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         createDeviceBackup.setPayload(payload);
 
         mBackupStore.dispatch(createDeviceBackup);
+    }
+
+    private void deleteBackupItem(int position) {
+        if (existingDeviceBackupFolders.size() == 0) {
+            Log.i(TAG, "NO BACKUP FILES FOUND");
+            return;
+        }
+
+        String backupFolderId = existingDeviceBackupFolders.get(position).getDriveId();
+
+        Payload payload = new Payload();
+        payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
+        payload.set("backupFolderId", backupFolderId);
+        payload.set("costsDb", DB_Costs.getInstance(this));
+
+        Action deleteDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.DeleteDeviceBackup);
+        deleteDeviceBackup.setPayload(payload);
+
+        mBackupStore.dispatch(deleteDeviceBackup);
     }
 
     private void enableBackground() {

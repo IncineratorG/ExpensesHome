@@ -6,6 +6,7 @@ import com.costs.newcosts.stores.realisation.backup_v2.actions.BuildGoogleDriveS
 import com.costs.newcosts.stores.realisation.backup_v2.actions.CheckInternetConnectionAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.ClearStoreAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.CreateDeviceBackupAction;
+import com.costs.newcosts.stores.realisation.backup_v2.actions.DeleteDeviceBackupAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.GetBackupDataAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.RestoreFromBackupAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetBackupDataAction;
@@ -33,6 +34,7 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
     public static final int SetRestoreStatus = 11;
     public static final int CreateDeviceBackup = 12;
     public static final int SetCreateDeviceBackupStatus = 13;
+    public static final int DeleteDeviceBackup = 14;
 
 
     @Override
@@ -88,6 +90,10 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
 
             case SetCreateDeviceBackupStatus: {
                 return new SetCreateDeviceBackupStatusAction();
+            }
+
+            case DeleteDeviceBackup: {
+                return new DeleteDeviceBackupAction();
             }
         }
 
