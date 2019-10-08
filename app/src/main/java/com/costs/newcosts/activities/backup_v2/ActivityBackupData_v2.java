@@ -25,8 +25,6 @@ import com.costs.newcosts.ActivityMainWithFragments;
 import com.costs.newcosts.Constants;
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.R;
-import com.costs.newcosts.activities.backup.AdapterActivityBackupDataRecyclerView;
-import com.costs.newcosts.activities.backup.DataUnitBackupFolder;
 import com.costs.newcosts.common.types.reactive.abstraction.Executable;
 import com.costs.newcosts.common.types.reactive.realisation.Subscription;
 import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
@@ -38,6 +36,7 @@ import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
 import com.costs.newcosts.stores.realisation.backup_v2.BackupState_v2;
 import com.costs.newcosts.stores.realisation.backup_v2.types.BackupData;
 import com.costs.newcosts.stores.realisation.backup_v2.types.CreateDeviceBackupStatus;
+import com.costs.newcosts.stores.realisation.backup_v2.types.DeleteDeviceBackupStatus;
 import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -92,6 +91,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     private Subscription mBackupContentSubscription;
     private Subscription mRestoreStatusSubscription;
     private Subscription mCreateDeviceBackupSubscription;
+    private Subscription mDeleteDeviceBackupSubscription;
 
     private AlertDialog mRestorationProgressDialog;
     private Executable mRestorationDialogCancelAction;
@@ -373,15 +373,14 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         });
 
         mCreateDeviceBackupSubscription = mBackupState.createDeviceBackupStatus.subscribe(() -> {
-            Log.d(TAG, CLASS_NAME + METHOD_NAME + "->CREATE_DEVICE_BACKUP_STATUS: " + mBackupState.createDeviceBackupStatus.get().getStatus());
-
             final String createDeviceBackupStatus = mBackupState.createDeviceBackupStatus.get().getStatus();
 
             switch (createDeviceBackupStatus) {
-                case CreateDeviceBackupStatus.Complete: {
+                case CreateDeviceBackupStatus.Complete:
+                case CreateDeviceBackupStatus.NotComplete: {
                     mProgressDialog.dismiss();
 
-                    // Получаем данные резервной копии.
+                    // Получаем список резервных копий.
                     Payload payload = new Payload();
                     payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
 
@@ -401,9 +400,35 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                     }
                     break;
                 }
+            }
+        });
 
-                case CreateDeviceBackupStatus.NotComplete: {
+        mDeleteDeviceBackupSubscription = mBackupState.deleteDeviceBackupStatus.subscribe(() -> {
+            final String deleteDeviceBackupStatus = mBackupState.deleteDeviceBackupStatus.get().getStatus();
+
+            switch (deleteDeviceBackupStatus) {
+                case DeleteDeviceBackupStatus.Complete:
+                case DeleteDeviceBackupStatus.NotComplete: {
                     mProgressDialog.dismiss();
+
+                    // Получаем данные резервной копии.
+                    Payload payload = new Payload();
+                    payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
+
+                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    getBackupData.setPayload(payload);
+
+                    mBackupStore.dispatch(getBackupData);
+
+                    break;
+                }
+
+                case DeleteDeviceBackupStatus.InProgress: {
+                    mProgressDialog.setTitle("");
+                    mProgressDialog.setMessage("Удаление резервной копии");
+                    if (!isFinishing()) {
+                        mProgressDialog.show();
+                    }
                     break;
                 }
             }
@@ -416,6 +441,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         mBackupDataSubscription.unsubscribe();
         mRestoreStatusSubscription.unsubscribe();
         mCreateDeviceBackupSubscription.unsubscribe();
+        mDeleteDeviceBackupSubscription.unsubscribe();
     }
 
     // При нажатии на элемент списка резервных копий - отображаем диалоговое окно,
@@ -540,7 +566,6 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         Payload payload = new Payload();
         payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
         payload.set("backupFolderId", backupFolderId);
-        payload.set("costsDb", DB_Costs.getInstance(this));
 
         Action deleteDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.DeleteDeviceBackup);
         deleteDeviceBackup.setPayload(payload);

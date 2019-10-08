@@ -33,9 +33,10 @@ import java.util.List;
 public class CreateDeviceBackupTask extends AsyncTask<Object, Object, Object> {
     private static final String TAG = "tag";
 
-    private Drive mGoogleDriveService = null;
-    private String mRootFolderId = null;
-    private DB_Costs mCostsDb = null;
+    private Drive mGoogleDriveService;
+    private String mRootFolderId;
+    private String mDeviceBackupFolderId;
+    private DB_Costs mCostsDb;
     private CreateDeviceBackupCompleted mCompletionCallback;
 
     private String mRootFolderName = "EXPENSES_BACKUP";
@@ -71,8 +72,6 @@ public class CreateDeviceBackupTask extends AsyncTask<Object, Object, Object> {
     }
 
     private ByteArrayOutputStream generateTableCostNamesXml() {
-        Log.d(TAG, "CreateDeviceBackupTask.generateTableCostNamesXml()");
-
         // Получаем содержимое TABLE_COST_NAMES
         List<DataUnitTableCostNames> tableCostNamesData = mCostsDb.getAllTableCostNames();
 
@@ -115,8 +114,6 @@ public class CreateDeviceBackupTask extends AsyncTask<Object, Object, Object> {
     }
 
     private ByteArrayOutputStream generateTableCostValuesXml() {
-        Log.d(TAG, "CreateDeviceBackupTask.generateTableCostValuesXml()");
-
         // Получаем содержимое TABLE_COST_VALUES
         List<DataUnitTableCostValues> tableCostValuesData = mCostsDb.getAllTableCostValues();
 
@@ -206,8 +203,8 @@ public class CreateDeviceBackupTask extends AsyncTask<Object, Object, Object> {
                 + backupUserComment;
 
         // Создаём папку, в которой будет находиться резервная копия.
-        String deviceBackupFolderId = createFolder(deviceBackupFolderName);
-        if (deviceBackupFolderId == null || deviceBackupFolderId.isEmpty()) {
+        mDeviceBackupFolderId = createFolder(deviceBackupFolderName);
+        if (mDeviceBackupFolderId == null || mDeviceBackupFolderId.isEmpty()) {
             Log.d(TAG, "CreateDeviceBackupTask.createBackup()->UNABLE_TO_CREATE_DEVICE_BACKUP_FOLDER");
             return;
         }
@@ -216,7 +213,7 @@ public class CreateDeviceBackupTask extends AsyncTask<Object, Object, Object> {
         try {
             File fileMetadata = new File();
             fileMetadata.setName(COST_NAME_FILE_NAME);
-            fileMetadata.setParents(Collections.singletonList(deviceBackupFolderId));
+            fileMetadata.setParents(Collections.singletonList(mDeviceBackupFolderId));
             fileMetadata.setMimeType("text/xml");
 
             File file = mGoogleDriveService.files().create(fileMetadata, new ByteArrayContent("", costNamesOutputStream.toByteArray()))
@@ -230,7 +227,7 @@ public class CreateDeviceBackupTask extends AsyncTask<Object, Object, Object> {
         try {
             File fileMetadata = new File();
             fileMetadata.setName(COST_VALUES_FILE_NAME);
-            fileMetadata.setParents(Collections.singletonList(deviceBackupFolderId));
+            fileMetadata.setParents(Collections.singletonList(mDeviceBackupFolderId));
             fileMetadata.setMimeType("text/xml");
 
             File file = mGoogleDriveService.files().create(fileMetadata, new ByteArrayContent("", costValuesOutputStream.toByteArray()))

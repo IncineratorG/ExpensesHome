@@ -5,16 +5,16 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.costs.newcosts.DB_Costs;
-import com.costs.newcosts.activities.backup.DataUnitBackupFolder;
+import com.costs.newcosts.activities.backup_v2.DataUnitBackupFolder;
 import com.costs.newcosts.services.realisation.backup.BackupService;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
 import com.costs.newcosts.stores.abstraction.State;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.common.Payload;
-import com.costs.newcosts.stores.realisation.backup.types.CreateBackupStatus;
 import com.costs.newcosts.stores.realisation.backup_v2.types.BackupData;
 import com.costs.newcosts.stores.realisation.backup_v2.types.CreateDeviceBackupStatus;
+import com.costs.newcosts.stores.realisation.backup_v2.types.DeleteDeviceBackupStatus;
 import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
 import com.costs.newcosts.stores.realisation.backup_v2.types.RestoreStatus;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -100,6 +100,11 @@ public class BackupStore_v2 extends Store {
 
             case BackupActionsFactory_v2.SetCreateDeviceBackupStatus: {
                 setCreateDeviceBackupStatus(action);
+                break;
+            }
+
+            case BackupActionsFactory_v2.SetDeleteDeviceBackupStatus: {
+                setDeleteDeviceBackupStatusReduce(action);
                 break;
             }
         }
@@ -246,6 +251,24 @@ public class BackupStore_v2 extends Store {
         }
 
         mState.createDeviceBackupStatus.set(createDeviceBackupStatus);
+    }
+
+    private void setDeleteDeviceBackupStatusReduce(Action action) {
+        if (!(action.getPayload() instanceof Payload)) {
+            Log.d(TAG, "BackupStore_v2.setDeleteDeviceBackupStatusReduce()->BAD_PAYLOAD");
+            return;
+        }
+
+        Payload payload = (Payload) action.getPayload();
+        DeleteDeviceBackupStatus deleteDeviceBackupStatus = null;
+        if (payload.get("deleteDeviceBackupStatus") instanceof DeleteDeviceBackupStatus) {
+            deleteDeviceBackupStatus = (DeleteDeviceBackupStatus) payload.get("deleteDeviceBackupStatus");
+        } else {
+            Log.d(TAG, "BackupStore_v2.setDeleteDeviceBackupStatusReduce()->BAD_PAYLOAD_DATA");
+            return;
+        }
+
+        mState.deleteDeviceBackupStatus.set(deleteDeviceBackupStatus);
     }
 
 
@@ -438,6 +461,44 @@ public class BackupStore_v2 extends Store {
     }
 
     private void deleteDeviceBackupEffect(Action action) {
-        Log.d(TAG, "BackupStore_v2.deleteDeviceBackupEffect()");
+        if (!(action.getPayload() instanceof Payload)) {
+            Log.d(TAG, "BackupStore_v2.deleteDeviceBackupEffect()->BAD_PAYLOAD");
+            return;
+        }
+
+        Payload payload = (Payload) action.getPayload();
+        Drive googleDriveService = null;
+        String backupFolderId = null;
+        if (payload.get("googleDriveService") instanceof Drive) {
+            googleDriveService = (Drive) payload.get("googleDriveService");
+        } else {
+            Log.d(TAG, "BackupStore_v2.deleteDeviceBackupEffect()->BAD_PAYLOAD_DATA");
+            return;
+        }
+        if (payload.get("backupFolderId") instanceof String) {
+            backupFolderId = (String) payload.get("backupFolderId");
+        } else {
+            Log.d(TAG, "BackupStore_v2.deleteDeviceBackupEffect()->BAD_PAYLOAD_DATA");
+            return;
+        }
+
+        Payload setDeleteDeviceBackupStatusPayload = new Payload();
+        setDeleteDeviceBackupStatusPayload.set("deleteDeviceBackupStatus", new DeleteDeviceBackupStatus(DeleteDeviceBackupStatus.InProgress));
+
+        Action setDeleteDeviceBackupStatus = mActionsFactory.getAction(BackupActionsFactory_v2.SetDeleteDeviceBackupStatus);
+        setDeleteDeviceBackupStatus.setPayload(setDeleteDeviceBackupStatusPayload);
+
+        dispatch(setDeleteDeviceBackupStatus);
+
+        mBackupService.deleteDeviceBackup(googleDriveService, backupFolderId, (complete) -> {
+            if (complete) {
+                setDeleteDeviceBackupStatusPayload.set("deleteDeviceBackupStatus", new DeleteDeviceBackupStatus(DeleteDeviceBackupStatus.Complete));
+            } else {
+                setDeleteDeviceBackupStatusPayload.set("deleteDeviceBackupStatus", new DeleteDeviceBackupStatus(DeleteDeviceBackupStatus.NotComplete));
+            }
+            setDeleteDeviceBackupStatus.setPayload(setDeleteDeviceBackupStatusPayload);
+
+            dispatch(setDeleteDeviceBackupStatus);
+        });
     }
 }

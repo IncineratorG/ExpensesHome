@@ -25,6 +25,7 @@ public class TaskRunner {
     public static final int GetBackupDataTask = 6;
     public static final int RestoreDataBaseFromBackupTask = 7;
     public static final int CreateDeviceBackupTask = 8;
+    public static final int DeleteDeviceBackupTask = 9;
 
 
     public TaskRunner() {
@@ -41,7 +42,7 @@ public class TaskRunner {
     }
 
     @SuppressWarnings("unchecked")
-    public void runTask(AsyncTask task) {
+    public void run(AsyncTask task) {
         if (mCurrentTask != null && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
             mCurrentTask.cancel(true);
         }
@@ -128,6 +129,15 @@ public class TaskRunner {
                 }
             }
 
+            case DeleteDeviceBackupTask: {
+                if (mCurrentTask instanceof DeleteDeviceBackupTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    mCurrentTask.cancel(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
             default: {
                 Log.d(TAG, "UNKNOWN_TASK_TYPE: " + String.valueOf(type));
             }
@@ -157,6 +167,8 @@ public class TaskRunner {
             return RestoreDataBaseFromBackupTask;
         } else if (task instanceof CreateDeviceBackupTask) {
             return CreateDeviceBackupTask;
+        } else if (task instanceof DeleteDeviceBackupTask) {
+            return DeleteDeviceBackupTask;
         }
 
         return -1;

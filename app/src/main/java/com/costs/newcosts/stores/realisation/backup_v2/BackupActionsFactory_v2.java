@@ -11,6 +11,7 @@ import com.costs.newcosts.stores.realisation.backup_v2.actions.GetBackupDataActi
 import com.costs.newcosts.stores.realisation.backup_v2.actions.RestoreFromBackupAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetBackupDataAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetCreateDeviceBackupStatusAction;
+import com.costs.newcosts.stores.realisation.backup_v2.actions.SetDeleteDeviceBackupStatusAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetDriveServiceBundleAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetGoogleSignInClientAction;
 import com.costs.newcosts.stores.realisation.backup_v2.actions.SetRestoreStatusAction;
@@ -35,6 +36,7 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
     public static final int CreateDeviceBackup = 12;
     public static final int SetCreateDeviceBackupStatus = 13;
     public static final int DeleteDeviceBackup = 14;
+    public static final int SetDeleteDeviceBackupStatus = 15;
 
 
     @Override
@@ -94,6 +96,10 @@ public class BackupActionsFactory_v2 implements ActionsFactory {
 
             case DeleteDeviceBackup: {
                 return new DeleteDeviceBackupAction();
+            }
+
+            case SetDeleteDeviceBackupStatus: {
+                return new SetDeleteDeviceBackupStatusAction();
             }
         }
 
