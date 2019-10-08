@@ -1,18 +1,18 @@
-package com.costs.newcosts.stores.realisation.backup_v2.actions;
+package com.costs.newcosts.stores.realisation.backup.actions;
 
 import com.costs.newcosts.stores.abstraction.Action;
-import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
+import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
 
 /**
  * TODO: Add a class header comment
  */
-public class ClearStoreAction implements Action {
+public class GetBackupDataAction implements Action {
     private Object mPayload;
 
 
     @Override
     public int getType() {
-        return BackupActionsFactory_v2.ClearStore;
+        return BackupActionsFactory.GetBackupData;
     }
 
     @Override

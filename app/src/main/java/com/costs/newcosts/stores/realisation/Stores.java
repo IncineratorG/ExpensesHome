@@ -1,20 +1,20 @@
 package com.costs.newcosts.stores.realisation;
 
 import com.costs.newcosts.stores.abstraction.Store;
-import com.costs.newcosts.stores.realisation.backup_v2.BackupStore_v2;
+import com.costs.newcosts.stores.realisation.backup.BackupStore;
 
 /**
  * TODO: Add a class header comment
  */
 public class Stores {
     private static Stores mInstance = null;
-    private com.costs.newcosts.stores.realisation.backup_v2.BackupStore_v2 mBackupStore_v2;
+    private BackupStore mBackupStore;
 
-    public static final int BackupStore_v2 = 2;
+    public static final int BackupStore = 2;
 
 
-    public Stores() {
-        mBackupStore_v2 = new BackupStore_v2();
+    private Stores() {
+        mBackupStore = new BackupStore();
     }
 
     public static synchronized Stores getInstance() {
@@ -28,8 +28,8 @@ public class Stores {
 
     public Store getStore(int type) {
         switch (type) {
-            case BackupStore_v2: {
-                return mBackupStore_v2;
+            case BackupStore: {
+                return mBackupStore;
             }
         }
 

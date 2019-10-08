@@ -1,18 +1,18 @@
-package com.costs.newcosts.stores.realisation.backup_v2.actions;
+package com.costs.newcosts.stores.realisation.backup.actions;
 
 import com.costs.newcosts.stores.abstraction.Action;
-import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
+import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
 
 /**
  * TODO: Add a class header comment
  */
-public class SetRestoreStatusAction implements Action {
+public class SetGoogleSignInClientAction implements Action {
     private Object mPayload;
 
 
     @Override
     public int getType() {
-        return BackupActionsFactory_v2.SetRestoreStatus;
+        return BackupActionsFactory.SetGoogleSignInClient;
     }
 
     @Override
@@ -25,3 +25,4 @@ public class SetRestoreStatusAction implements Action {
         mPayload = payload;
     }
 }
+

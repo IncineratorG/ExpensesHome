@@ -1,4 +1,4 @@
-package com.costs.newcosts.stores.realisation.backup_v2.types;
+package com.costs.newcosts.stores.realisation.backup.types;
 
 /**
  * TODO: Add a class header comment

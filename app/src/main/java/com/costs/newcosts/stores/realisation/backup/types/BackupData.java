@@ -1,6 +1,6 @@
-package com.costs.newcosts.stores.realisation.backup_v2.types;
+package com.costs.newcosts.stores.realisation.backup.types;
 
-import com.costs.newcosts.activities.backup_v2.DataUnitBackupFolder;
+import com.costs.newcosts.activities.backup.DataUnitBackupFolder;
 
 import java.util.ArrayList;
 import java.util.List;

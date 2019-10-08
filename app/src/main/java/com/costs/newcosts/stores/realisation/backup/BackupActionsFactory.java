@@ -1,27 +1,27 @@
-package com.costs.newcosts.stores.realisation.backup_v2;
+package com.costs.newcosts.stores.realisation.backup;
 
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.ActionsFactory;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.BuildGoogleDriveServiceAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.CheckInternetConnectionAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.ClearStoreAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.CreateDeviceBackupAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.DeleteDeviceBackupAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.GetBackupDataAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.RestoreFromBackupAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetBackupDataAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetCreateDeviceBackupStatusAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetDeleteDeviceBackupStatusAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetDriveServiceBundleAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetGoogleSignInClientAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetRestoreStatusAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.SetSignInAction;
-import com.costs.newcosts.stores.realisation.backup_v2.actions.StopCurrentAsyncTaskAction;
+import com.costs.newcosts.stores.realisation.backup.actions.BuildGoogleDriveServiceAction;
+import com.costs.newcosts.stores.realisation.backup.actions.CheckInternetConnectionAction;
+import com.costs.newcosts.stores.realisation.backup.actions.ClearStoreAction;
+import com.costs.newcosts.stores.realisation.backup.actions.CreateDeviceBackupAction;
+import com.costs.newcosts.stores.realisation.backup.actions.DeleteDeviceBackupAction;
+import com.costs.newcosts.stores.realisation.backup.actions.GetBackupDataAction;
+import com.costs.newcosts.stores.realisation.backup.actions.RestoreFromBackupAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetBackupDataAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetCreateDeviceBackupStatusAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetDeleteDeviceBackupStatusAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetDriveServiceBundleAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetGoogleSignInClientAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetRestoreStatusAction;
+import com.costs.newcosts.stores.realisation.backup.actions.SetSignInAction;
+import com.costs.newcosts.stores.realisation.backup.actions.StopCurrentAsyncTaskAction;
 
 /**
  * TODO: Add a class header comment
  */
-public class BackupActionsFactory_v2 implements ActionsFactory {
+public class BackupActionsFactory implements ActionsFactory {
     public static final int CheckInternetConnection = 1;
     public static final int SetGoogleSignInClient = 2;
     public static final int SetSignIn = 3;

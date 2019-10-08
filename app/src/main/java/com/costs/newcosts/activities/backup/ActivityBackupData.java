@@ -1,4 +1,4 @@
-package com.costs.newcosts.activities.backup_v2;
+package com.costs.newcosts.activities.backup;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,19 +25,18 @@ import com.costs.newcosts.ActivityMainWithFragments;
 import com.costs.newcosts.Constants;
 import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.R;
-import com.costs.newcosts.common.types.reactive.abstraction.Executable;
 import com.costs.newcosts.common.types.reactive.realisation.Subscription;
 import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
 import com.costs.newcosts.stores.abstraction.Action;
 import com.costs.newcosts.stores.abstraction.Store;
 import com.costs.newcosts.stores.common.Payload;
 import com.costs.newcosts.stores.realisation.Stores;
-import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
-import com.costs.newcosts.stores.realisation.backup_v2.BackupState_v2;
-import com.costs.newcosts.stores.realisation.backup_v2.types.BackupData;
-import com.costs.newcosts.stores.realisation.backup_v2.types.CreateDeviceBackupStatus;
-import com.costs.newcosts.stores.realisation.backup_v2.types.DeleteDeviceBackupStatus;
-import com.costs.newcosts.stores.realisation.backup_v2.types.DriveServiceBundle;
+import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
+import com.costs.newcosts.stores.realisation.backup.BackupState;
+import com.costs.newcosts.stores.realisation.backup.types.BackupData;
+import com.costs.newcosts.stores.realisation.backup.types.CreateDeviceBackupStatus;
+import com.costs.newcosts.stores.realisation.backup.types.DeleteDeviceBackupStatus;
+import com.costs.newcosts.stores.realisation.backup.types.DriveServiceBundle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -52,24 +51,17 @@ import java.util.List;
 /**
  * TODO: Add a class header comment
  */
-public class ActivityBackupData_v2 extends AppCompatActivity {
+public class ActivityBackupData extends AppCompatActivity {
     private static final String TAG = "tag";
-    private static final String CLASS_NAME = "ActivityBackupData_v2";
+    private static final String CLASS_NAME = "ActivityBackupData";
 
     private ImageView arrowBackImageView;
 
     private Button createBackupDataButton;
 
-    private String TABLE_COST_NAMES_FILE_NAME = "cost_names_data.xml";
-    private String TABLE_COST_VALUES_FILE_NAME = "cost_values_data.xml";
-    private String DEVICE_BACKUP_FOLDER_NAME;
-    private String REFERENCE_FILE_NAME = "reference_file";
-
-    private String ROOT_BACKUP_FOLDER_NAME = "EXPENSES_BACKUP";
     private List<DataUnitBackupFolder> existingDeviceBackupFolders = new ArrayList<>();
 
     private Calendar calendar;
-    private String BACKUP_USER_COMMENT = "";
 
     private RecyclerView backupListRecyclerView;
     private AdapterActivityBackupDataRecyclerView backupDataRecyclerViewAdapter;
@@ -82,22 +74,16 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     private static final int REQUEST_CODE_SIGN_IN = 1;
 
     private Store mBackupStore;
-    private BackupState_v2 mBackupState;
+    private BackupState mBackupState;
 
     private Subscription mHasInternetConnectionSubscription;
     private Subscription mGoogleDriveServiceBundleSubscription;
     private Subscription mBackupDataSubscription;
-    private Subscription mRootFolderIdSubscription;
-    private Subscription mBackupContentSubscription;
     private Subscription mRestoreStatusSubscription;
     private Subscription mCreateDeviceBackupSubscription;
     private Subscription mDeleteDeviceBackupSubscription;
 
-    private AlertDialog mRestorationProgressDialog;
-    private Executable mRestorationDialogCancelAction;
-
     private ProgressDialog mProgressDialog;
-    private Executable mProgressDialogCancelAction;
 
 
     @Override
@@ -127,11 +113,11 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         statusTextView = (TextView) findViewById(R.id.backup_data_status_textview);
         statusTextView.setText(getResources().getString(R.string.abd_statusTextView_noConnection_string));
 
-        mBackupStore = Stores.getInstance().getStore(Stores.BackupStore_v2);
-        mBackupState = (BackupState_v2) mBackupStore.getState();
+        mBackupStore = Stores.getInstance().getStore(Stores.BackupStore);
+        mBackupState = (BackupState) mBackupStore.getState();
 
         // Очищаем всю информацию в хранилище.
-        Action clearStoreAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.ClearStore);
+        Action clearStoreAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.ClearStore);
         mBackupStore.dispatch(clearStoreAction);
 
         // Подписываемся на необходимые параметры хранилища.
@@ -140,10 +126,10 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         // Все кнопки, кроме кнопки "Назад" делаем неактивными до момента получения данных обфайлах резервных копий.
         disableBackground();
 
-        mProgressDialog = new ProgressDialog(ActivityBackupData_v2.this);
+        mProgressDialog = new ProgressDialog(ActivityBackupData.this);
         mProgressDialog.setCancelable(false);
         mProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getResources().getString(R.string.atrd_restoringProgressDialogBuilder_Cancel_string), (d, w) -> {
-            mBackupStore.dispatch(mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.StopCurrentAsyncTask));
+            mBackupStore.dispatch(mBackupStore.getActionFactory().getAction(BackupActionsFactory.StopCurrentAsyncTask));
         });
     }
 
@@ -155,7 +141,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         Payload payload = new Payload();
         payload.set("context", this);
 
-        Action checkInternetConnectionAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.CheckInternetConnection);
+        Action checkInternetConnectionAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.CheckInternetConnection);
         checkInternetConnectionAction.setPayload(payload);
 
         mBackupStore.dispatch(checkInternetConnectionAction);
@@ -170,13 +156,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
         unsubscribeAll();
-
-
-//        if (asyncTaskRestoreData != null)
-//            asyncTaskRestoreData.cancel(true);
-//        disconnectFromGoogleDrive();
     }
 
     @Override
@@ -186,9 +166,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
 
     // Возвращаемся к предыдущему экрану
     private void returnToPreviousActivity() {
-//        if (asyncTaskRestoreData != null)
-//            asyncTaskRestoreData.cancel(true);
-        Intent mainActivityWithFragmentsIntent = new Intent(ActivityBackupData_v2.this, ActivityMainWithFragments.class);
+        Intent mainActivityWithFragmentsIntent = new Intent(ActivityBackupData.this, ActivityMainWithFragments.class);
         mainActivityWithFragmentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(mainActivityWithFragmentsIntent);
     }
@@ -203,7 +181,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                         .build();
         GoogleSignInClient client = GoogleSignIn.getClient(this, signInOptions);
 
-        Action setGoogleSignInClient = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.SetGoogleSignInClient);
+        Action setGoogleSignInClient = mBackupStore.getActionFactory().getAction(BackupActionsFactory.SetGoogleSignInClient);
 
         Payload payload = new Payload();
         payload.set("googleSignInClient", client);
@@ -238,7 +216,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
 
     private void handleSignInResult(Intent result) {
         // Устанавливаем признак того, что пользователь залогинился.
-        Action signInAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.SetSignIn);
+        Action signInAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.SetSignIn);
 
         mBackupStore.dispatch(signInAction);
 
@@ -248,7 +226,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         payload.set("context", this);
         payload.set("appLabel", getAppLabel(this));
 
-        Action buildGoogleDriveServiceAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.BuildGoogleDriveService);
+        Action buildGoogleDriveServiceAction = mBackupStore.getActionFactory().getAction(BackupActionsFactory.BuildGoogleDriveService);
         buildGoogleDriveServiceAction.setPayload(payload);
 
         mBackupStore.dispatch(buildGoogleDriveServiceAction);
@@ -274,7 +252,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                     Payload payload = new Payload();
                     payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
 
-                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupData);
                     getBackupData.setPayload(payload);
 
                     mBackupStore.dispatch(getBackupData);
@@ -306,7 +284,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                     // Отображаем полученный список резервных копий
                     existingDeviceBackupFolders = mBackupState.backupData.get().getDeviceBackupFolders();
                     backupListRecyclerView.setLayoutManager(linearLayoutManager);
-                    backupDataRecyclerViewAdapter = new AdapterActivityBackupDataRecyclerView(ActivityBackupData_v2.this, existingDeviceBackupFolders);
+                    backupDataRecyclerViewAdapter = new AdapterActivityBackupDataRecyclerView(ActivityBackupData.this, existingDeviceBackupFolders);
                     backupListRecyclerView.setAdapter(backupDataRecyclerViewAdapter);
 
                     enableBackground();
@@ -384,7 +362,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                     Payload payload = new Payload();
                     payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
 
-                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupData);
                     getBackupData.setPayload(payload);
 
                     mBackupStore.dispatch(getBackupData);
@@ -415,7 +393,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
                     Payload payload = new Payload();
                     payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
 
-                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.GetBackupData);
+                    Action getBackupData = mBackupStore.getActionFactory().getAction(BackupActionsFactory.GetBackupData);
                     getBackupData.setPayload(payload);
 
                     mBackupStore.dispatch(getBackupData);
@@ -452,8 +430,8 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(selectedBackupItem.getMilliseconds());
 
-        AlertDialog.Builder chosenBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
-        LayoutInflater inflater = LayoutInflater.from(ActivityBackupData_v2.this);
+        AlertDialog.Builder chosenBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData.this);
+        LayoutInflater inflater = LayoutInflater.from(ActivityBackupData.this);
         View dialogView = inflater.inflate(R.layout.edit_cost_value_dialog, null);
         chosenBackupItemDialogBuilder.setView(dialogView);
 
@@ -488,7 +466,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         restoreButton.setOnClickListener((v) -> {
             chosenBackupItemDialog.dismiss();
 
-            AlertDialog.Builder restoreFromChosenBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
+            AlertDialog.Builder restoreFromChosenBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData.this);
             restoreFromChosenBackupItemDialogBuilder.setTitle(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_Title_string));
             restoreFromChosenBackupItemDialogBuilder.setMessage(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_Message_string));
             restoreFromChosenBackupItemDialogBuilder.setPositiveButton(getResources().getString(R.string.abd_restoreFromChosenBackupItemDialogBuilder_continue_button_string), (d, w) -> {
@@ -507,7 +485,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         deleteButton.setOnClickListener((v) -> {
             chosenBackupItemDialog.dismiss();
 
-            AlertDialog.Builder deleteBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData_v2.this);
+            AlertDialog.Builder deleteBackupItemDialogBuilder = new AlertDialog.Builder(ActivityBackupData.this);
             deleteBackupItemDialogBuilder.setTitle(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_Title_string));
             deleteBackupItemDialogBuilder.setMessage(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_Message_string));
             deleteBackupItemDialogBuilder.setPositiveButton(getResources().getString(R.string.abd_deleteBackupItemDialogBuilder_delete_button_string), (d, w) -> {
@@ -537,7 +515,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         payload.set("backupFolderId", backupFolderId);
         payload.set("costsDb", DB_Costs.getInstance(this));
 
-        Action restoreFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.RestoreFromBackup);
+        Action restoreFromBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.RestoreFromBackup);
         restoreFromBackup.setPayload(payload);
 
         mBackupStore.dispatch(restoreFromBackup);
@@ -549,7 +527,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         payload.set("rootFolderId", mBackupState.backupData.get().getRootFolderId());
         payload.set("costsDb", DB_Costs.getInstance(this));
 
-        Action createDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.CreateDeviceBackup);
+        Action createDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.CreateDeviceBackup);
         createDeviceBackup.setPayload(payload);
 
         mBackupStore.dispatch(createDeviceBackup);
@@ -567,7 +545,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         payload.set("googleDriveService", mBackupState.driveServiceBundle.get().getDriveService());
         payload.set("backupFolderId", backupFolderId);
 
-        Action deleteDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory_v2.DeleteDeviceBackup);
+        Action deleteDeviceBackup = mBackupStore.getActionFactory().getAction(BackupActionsFactory.DeleteDeviceBackup);
         deleteDeviceBackup.setPayload(payload);
 
         mBackupStore.dispatch(deleteDeviceBackup);
@@ -591,7 +569,7 @@ public class ActivityBackupData_v2 extends AppCompatActivity {
         }
 
         createBackupDataButton.setEnabled(false);
-        createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData_v2.this, R.color.lightGrey));
+        createBackupDataButton.setTextColor(ContextCompat.getColor(ActivityBackupData.this, R.color.lightGrey));
 
         selectGoogleAccountImageView.setEnabled(false);
     }

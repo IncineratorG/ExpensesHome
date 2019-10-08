@@ -1,7 +1,7 @@
-package com.costs.newcosts.stores.realisation.backup_v2.actions;
+package com.costs.newcosts.stores.realisation.backup.actions;
 
 import com.costs.newcosts.stores.abstraction.Action;
-import com.costs.newcosts.stores.realisation.backup_v2.BackupActionsFactory_v2;
+import com.costs.newcosts.stores.realisation.backup.BackupActionsFactory;
 
 /**
  * TODO: Add a class header comment
@@ -12,7 +12,7 @@ public class SetDriveServiceBundleAction implements Action {
 
     @Override
     public int getType() {
-        return BackupActionsFactory_v2.SetDriveServiceBundle;
+        return BackupActionsFactory.SetDriveServiceBundle;
     }
 
     @Override

@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.costs.newcosts.activities.backup_v2.ActivityBackupData_v2;
+import com.costs.newcosts.activities.backup.ActivityBackupData;
 
 public class ActivityMainWithFragments extends AppCompatActivity {
 
@@ -47,7 +47,7 @@ public class ActivityMainWithFragments extends AppCompatActivity {
         backupDataImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent backupDataActivity = new Intent(ActivityMainWithFragments.this, ActivityBackupData_v2.class);
+                Intent backupDataActivity = new Intent(ActivityMainWithFragments.this, ActivityBackupData.class);
                 startActivity(backupDataActivity);
             }
         });

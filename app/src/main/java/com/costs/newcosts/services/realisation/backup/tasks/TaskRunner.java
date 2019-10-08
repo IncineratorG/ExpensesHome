@@ -24,7 +24,7 @@ public class TaskRunner {
     public static final int DeleteDeviceBackupTask = 9;
 
 
-    public TaskRunner() {
+    private TaskRunner() {
         mCurrentTask = null;
     }
 

@@ -1,4 +1,4 @@
-package com.costs.newcosts.activities.backup_v2;
+package com.costs.newcosts.activities.backup;
 
 import com.costs.newcosts.Constants;
 
