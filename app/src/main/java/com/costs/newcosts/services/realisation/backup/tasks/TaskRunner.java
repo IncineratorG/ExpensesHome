@@ -17,10 +17,6 @@ public class TaskRunner {
     public static final String TaskInterruptedStatus = "task_interrupted";
     public static final String TaskErrorOccurredStatus = "task_error_occurred";
 
-    public static final int GetBackupFolderContentTask = 1;
-    public static final int GetBackupListTask = 2;
-    public static final int GetRootFolderTask = 3;
-    public static final int RestoreDataBaseTask = 4;
     public static final int CreateBackupTask = 5;
     public static final int GetBackupDataTask = 6;
     public static final int RestoreDataBaseFromBackupTask = 7;
@@ -57,51 +53,6 @@ public class TaskRunner {
 
     public boolean stopTask(int type) {
         switch (type) {
-            case GetBackupFolderContentTask: {
-                if (mCurrentTask instanceof GetBackupFolderContentTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
-                    mCurrentTask.cancel(true);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            case GetBackupListTask: {
-                if (mCurrentTask instanceof GetBackupListTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
-                    mCurrentTask.cancel(true);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            case GetRootFolderTask: {
-                if (mCurrentTask instanceof GetRootFolderTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
-                    mCurrentTask.cancel(true);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            case RestoreDataBaseTask: {
-                if (mCurrentTask instanceof RestoreDataBaseTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
-                    mCurrentTask.cancel(true);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            case CreateBackupTask: {
-                if (mCurrentTask instanceof CreateBackupTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
-                    mCurrentTask.cancel(true);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
             case GetBackupDataTask: {
                 if (mCurrentTask instanceof GetBackupDataTask && mCurrentTask.getStatus() == AsyncTask.Status.RUNNING) {
                     mCurrentTask.cancel(true);
@@ -151,17 +102,7 @@ public class TaskRunner {
             return -1;
         }
 
-        if (task instanceof GetBackupFolderContentTask) {
-            return GetBackupFolderContentTask;
-        } else if (task instanceof GetBackupListTask) {
-            return GetBackupListTask;
-        } else if (task instanceof GetRootFolderTask) {
-            return GetRootFolderTask;
-        } else if (task instanceof RestoreDataBaseTask) {
-            return RestoreDataBaseTask;
-        } else if (task instanceof CreateBackupTask) {
-            return CreateBackupTask;
-        } else if (task instanceof GetBackupDataTask) {
+        if (task instanceof GetBackupDataTask) {
             return GetBackupDataTask;
         } else if (task instanceof RestoreDataBaseFromBackupTask) {
             return RestoreDataBaseFromBackupTask;
@@ -173,50 +114,4 @@ public class TaskRunner {
 
         return -1;
     }
-
-
-
-//    public void runGetBackupFolderContentTask(Drive googleDriveService, String folderId, GetBackupFolderContentCompleted callback) {
-//        mGetBackupFolderContentTask = new GetBackupFolderContentTask(googleDriveService, folderId, callback);
-//        mGetBackupFolderContentTask.execute();
-//    }
-//
-//    public void stopGetBackupFolderContentTask() {
-//        if (mGetBackupFolderContentTask != null && mGetBackupFolderContentTask.getStatus() == AsyncTask.Status.RUNNING) {
-//            mGetBackupFolderContentTask.cancel(true);
-//        }
-//    }
-//
-//    public void runGetBackupListTask(Drive googleDriveService, String rootFolderId, GetBackupListCompleted callback) {
-//        mGetBackupListTask = new GetBackupListTask(googleDriveService, rootFolderId, callback);
-//        mGetBackupListTask.execute();
-//    }
-//
-//    public void stopGetBackupListTask() {
-//        if (mGetBackupListTask != null && mGetBackupListTask.getStatus() == AsyncTask.Status.RUNNING) {
-//            mGetBackupListTask.cancel(true);
-//        }
-//    }
-//
-//    public void runGetRootFolderTask(Drive googleDriveService, GetRootFolderCompleted callback) {
-//        mGetRootFolderTask = new GetRootFolderTask(googleDriveService, callback);
-//        mGetRootFolderTask.execute();
-//    }
-//
-//    public void stopGetRootFolderTask() {
-//        if (mGetRootFolderTask != null && mGetRootFolderTask.getStatus() == AsyncTask.Status.RUNNING) {
-//            mGetRootFolderTask.cancel(true);
-//        }
-//    }
-//
-//    public void runRestoreDataBaseTask(DB_Costs costsDb, InputStream costValuesStream, InputStream costNamesStream, RestoreDataBaseProgress progressCallback) {
-//        mRestoreDataBaseTask = new RestoreDataBaseTask(costsDb, costValuesStream, costNamesStream, progressCallback);
-//        mRestoreDataBaseTask.execute();
-//    }
-//
-//    public void stopRestoreDataBaseTask() {
-//        if (mRestoreDataBaseTask != null && mRestoreDataBaseTask.getStatus() == AsyncTask.Status.RUNNING) {
-//            mRestoreDataBaseTask.cancel(true);
-//        }
-//    }
 }
