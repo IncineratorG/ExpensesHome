@@ -16,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -29,6 +30,8 @@ import java.util.List;
  */
 
 public class ActivitySmsExpensesReader extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final String TAG = "tag";
 
     private static final int LOADER_ID = 1;
     private static final String SMS_URI = "content://sms/inbox";
@@ -60,12 +63,7 @@ public class ActivitySmsExpensesReader extends AppCompatActivity implements Load
 
         // Стрелка "Назад"
         ImageView arrowBackImageView = (ImageView) findViewById(R.id.activity_sms_expenses_reader_arrow_back);
-        arrowBackImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                returnToPreviousActivity();
-            }
-        });
+        arrowBackImageView.setOnClickListener(v -> returnToPreviousActivity());
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         smsReaderRecyclerView = (RecyclerView) findViewById(R.id.activity_sms_expenses_reader_recycler_view);
@@ -84,10 +82,12 @@ public class ActivitySmsExpensesReader extends AppCompatActivity implements Load
         // =========================================
         int permissionCheck = ContextCompat.checkSelfPermission(ActivitySmsExpensesReader.this, android.Manifest.permission.READ_SMS);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "HERE");
             ActivityCompat.requestPermissions(ActivitySmsExpensesReader.this,
                                                 new String[]{android.Manifest.permission.READ_SMS},
                                                 MY_PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
+            Log.d(TAG, "THERE");
             getSupportLoaderManager().initLoader(LOADER_ID, null, this);
         }
 
@@ -121,10 +121,12 @@ public class ActivitySmsExpensesReader extends AppCompatActivity implements Load
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    System.out.println("PERMISSION_GRANTED");
+//                    System.out.println("PERMISSION_GRANTED");
+                    Log.d(TAG, "PERMISSION_GRANTED");
                     getSupportLoaderManager().initLoader(LOADER_ID, null, this);
                 } else {
-                    System.out.println("PERMISSION_DENIED");
+//                    System.out.println("PERMISSION_DENIED");
+                    Log.d(TAG, "PERMISSION_DENIED");
                 }
             }
         }

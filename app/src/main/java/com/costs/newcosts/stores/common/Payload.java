@@ -1,7 +1,5 @@
 package com.costs.newcosts.stores.common;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,14 +17,10 @@ public class Payload {
     }
 
     public void set(String key, Object value) {
-//        Log.d(TAG, key + " " + value.toString());
-
         mMap.put(key, value);
     }
 
     public Object get(String key) {
-//        Log.d(TAG, "get() -> " + key + " " + mMap.toString());
-
         if (mMap.containsKey(key)) {
             return mMap.get(key);
         }
