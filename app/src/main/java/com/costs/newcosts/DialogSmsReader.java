@@ -3,6 +3,7 @@ package com.costs.newcosts;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -92,24 +93,24 @@ public class DialogSmsReader extends Dialog {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (!expenseValueEditText.getText().toString().isEmpty()) {
-//                    DB_Costs cdb = DB_Costs.getInstance(context);
-//                    DB_SmsNotes smsNotesDB = DB_SmsNotes.getInstance(context);
-//
-//                    cdb.addCostInMilliseconds(selectedExpenseNameDataUnit.getExpenseId_N(),
-//                            expenseValueEditText.getText().toString(),
-//                            sms.getSmsDateInMillisLong(),
-//                            expenseNoteEditText.getText().toString());
-//
-//                    smsNotesDB.addNote(selectedExpenseNameDataUnit.getExpenseId_N(), noteString.toLowerCase());
-//
-//                    Callback.getSmsReaderDialogResult(true, expenseValueEditText.getText().toString());
-//                    dismiss();
-//                } else {
-//                    wrongValueToast = Toast.makeText(context, "Введите сумму", Toast.LENGTH_SHORT);
-//                    wrongValueToast.setGravity(Gravity.CENTER, 0, 0);
-//                    wrongValueToast.show();
-//                }
+                if (!expenseValueEditText.getText().toString().isEmpty()) {
+                    DB_Costs cdb = DB_Costs.getInstance(context);
+                    DB_SmsNotes smsNotesDB = DB_SmsNotes.getInstance(context);
+
+                    cdb.addCostInMilliseconds(selectedExpenseNameDataUnit.getExpenseId_N(),
+                            expenseValueEditText.getText().toString(),
+                            sms.getSmsDateInMillisLong(),
+                            expenseNoteEditText.getText().toString());
+
+                    smsNotesDB.addNote(selectedExpenseNameDataUnit.getExpenseId_N(), noteString.toLowerCase());
+
+                    Callback.getSmsReaderDialogResult(true, expenseValueEditText.getText().toString());
+                    dismiss();
+                } else {
+                    wrongValueToast = Toast.makeText(context, "Введите сумму", Toast.LENGTH_SHORT);
+                    wrongValueToast.setGravity(Gravity.CENTER, 0, 0);
+                    wrongValueToast.show();
+                }
             }
         });
 

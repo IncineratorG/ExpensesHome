@@ -333,6 +333,8 @@ public class ActivitySmsExpensesReader
 
     @Override
     public void getSmsReaderDialogResult(boolean savedInDB, String value) {
+        Log.d(TAG, String.valueOf(savedInDB));
+
         if (savedInDB) {
             smsDataList.remove(chosenSmsPosition);
             smsReaderRecyclerViewAdapter.notifyItemRemoved(chosenSmsPosition);
