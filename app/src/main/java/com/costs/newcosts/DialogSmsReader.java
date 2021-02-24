@@ -3,6 +3,7 @@ package com.costs.newcosts;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -20,6 +21,7 @@ import java.util.List;
  */
 
 public class DialogSmsReader extends Dialog {
+    private static final String TAG = "tag";
 
     private Context context;
 
@@ -56,6 +58,8 @@ public class DialogSmsReader extends Dialog {
         this.activeExpenseNamesList = activeExpenseNamesList;
         this.noteString = noteString;
         Callback = (DialogSmsReaderCallback) context;
+
+        Log.d(TAG, "DialogSmsReader->noteString: " + noteString);
     }
 
     @Override

@@ -1,9 +1,9 @@
-package com.costs.newcosts.services.realisation.backup.tasks;
+package com.costs.newcosts.services.backup.tasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.costs.newcosts.services.realisation.backup.callbacks.DeleteDeviceBackupCompleted;
+import com.costs.newcosts.services.backup.callbacks.DeleteDeviceBackupCompleted;
 import com.google.api.services.drive.Drive;
 
 import java.io.IOException;

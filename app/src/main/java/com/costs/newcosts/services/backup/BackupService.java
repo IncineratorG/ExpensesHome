@@ -1,4 +1,4 @@
-package com.costs.newcosts.services.realisation.backup;
+package com.costs.newcosts.services.backup;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,15 +6,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.costs.newcosts.DB_Costs;
-import com.costs.newcosts.services.realisation.backup.callbacks.CreateDeviceBackupCompleted;
-import com.costs.newcosts.services.realisation.backup.callbacks.DeleteDeviceBackupCompleted;
-import com.costs.newcosts.services.realisation.backup.callbacks.GetBackupDataCompleted;
-import com.costs.newcosts.services.realisation.backup.callbacks.RestoreDataBaseFromBackupProgress;
-import com.costs.newcosts.services.realisation.backup.tasks.CreateDeviceBackupTask;
-import com.costs.newcosts.services.realisation.backup.tasks.DeleteDeviceBackupTask;
-import com.costs.newcosts.services.realisation.backup.tasks.GetBackupDataTask;
-import com.costs.newcosts.services.realisation.backup.tasks.RestoreDataBaseFromBackupTask;
-import com.costs.newcosts.services.realisation.backup.tasks.TaskRunner;
+import com.costs.newcosts.services.backup.callbacks.CreateDeviceBackupCompleted;
+import com.costs.newcosts.services.backup.callbacks.DeleteDeviceBackupCompleted;
+import com.costs.newcosts.services.backup.callbacks.GetBackupDataCompleted;
+import com.costs.newcosts.services.backup.callbacks.RestoreDataBaseFromBackupProgress;
+import com.costs.newcosts.services.backup.tasks.CreateDeviceBackupTask;
+import com.costs.newcosts.services.backup.tasks.DeleteDeviceBackupTask;
+import com.costs.newcosts.services.backup.tasks.GetBackupDataTask;
+import com.costs.newcosts.services.backup.tasks.RestoreDataBaseFromBackupTask;
+import com.costs.newcosts.services.backup.tasks.TaskRunner;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;

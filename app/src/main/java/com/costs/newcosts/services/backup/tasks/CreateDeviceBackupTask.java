@@ -1,4 +1,4 @@
-package com.costs.newcosts.services.realisation.backup.tasks;
+package com.costs.newcosts.services.backup.tasks;
 
 import android.os.AsyncTask;
 import android.os.Build;
@@ -10,18 +10,15 @@ import com.costs.newcosts.DB_Costs;
 import com.costs.newcosts.DataUnitTableCostNames;
 import com.costs.newcosts.DataUnitTableCostValues;
 import com.costs.newcosts.XmlTags;
-import com.costs.newcosts.services.realisation.backup.callbacks.CreateDeviceBackupCompleted;
+import com.costs.newcosts.services.backup.callbacks.CreateDeviceBackupCompleted;
 import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;

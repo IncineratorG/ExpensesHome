@@ -2,6 +2,7 @@ package com.costs.newcosts;
 
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import java.util.List;
  */
 
 public class AdapterSmsReaderRecyclerView extends RecyclerView.Adapter<AdapterSmsReaderRecyclerView.SmsReaderViewHolder> {
+    private static final String TAG = "tag";
+
     private OnItemClickListener clickListener;
     private Cursor cursor;
     private List<DataUnitSms> dataList;
@@ -30,6 +33,8 @@ public class AdapterSmsReaderRecyclerView extends RecyclerView.Adapter<AdapterSm
 
 
     public AdapterSmsReaderRecyclerView(List<DataUnitSms> data) {
+//        Log.d(TAG, "AdapterSmsReaderRecyclerView->DATA: " + data.size());
+
         dataList = data;
         calendar = new GregorianCalendar();
         currentTimeInMillis = calendar.getTimeInMillis();
