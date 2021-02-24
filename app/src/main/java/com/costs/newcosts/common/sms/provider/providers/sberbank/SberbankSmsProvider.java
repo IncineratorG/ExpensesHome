@@ -3,11 +3,10 @@ package com.costs.newcosts.common.sms.provider.providers.sberbank;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v4.content.CursorLoader;
+import androidx.loader.content.CursorLoader;
 import android.util.Log;
 
 import com.costs.newcosts.DB_Costs;
-import com.costs.newcosts.DataUnitExpenses;
 import com.costs.newcosts.DataUnitSms;
 import com.costs.newcosts.common.sms.provider.SmsProvider;
 import com.costs.newcosts.common.sms.reader_result.SmsExpenseReaderResult;

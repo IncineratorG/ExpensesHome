@@ -3,7 +3,7 @@ package com.costs.newcosts.common.sms.provider.providers.mkb;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v4.content.CursorLoader;
+import androidx.loader.content.CursorLoader;
 import android.util.Log;
 
 import com.costs.newcosts.common.sms.provider.SmsProvider;
@@ -28,7 +28,7 @@ public class MkbSmsProvider implements SmsProvider {
     public MkbSmsProvider() {
         // Выбираем сообщения за последние два дня
         Calendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.DAY_OF_MONTH, -3);
+        calendar.add(Calendar.DAY_OF_MONTH, 0);
         millis = calendar.getTimeInMillis();
     }
 
@@ -38,13 +38,13 @@ public class MkbSmsProvider implements SmsProvider {
 
         Uri smsUri = Uri.parse(SMS_URI);
 
-        return null;
-//        return new CursorLoader(context,
-//                smsUri,
-//                SMS_PROJECTION,
-//                "address = '900' and date > " + String.valueOf(millis),
-//                SMS_SELECTION_ARGS,
-//                SMS_SORT_ORDER);
+//        return null;
+        return new CursorLoader(context,
+                smsUri,
+                SMS_PROJECTION,
+                "address = '900' and date > " + String.valueOf(millis),
+                SMS_SELECTION_ARGS,
+                SMS_SORT_ORDER);
     }
 
     @Override

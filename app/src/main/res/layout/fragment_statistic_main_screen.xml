@@ -17,7 +17,7 @@
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/statistic_main_screen__choose_period_button_divider">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/statistic_main_screen_recycler_view"

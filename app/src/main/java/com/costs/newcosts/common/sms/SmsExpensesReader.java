@@ -3,9 +3,9 @@ package com.costs.newcosts.common.sms;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 import android.util.Log;
 
 import com.costs.newcosts.common.sms.provider.SmsProvider;
@@ -57,16 +57,21 @@ public class SmsExpensesReader implements LoaderManager.LoaderCallbacks<Cursor> 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "SmsExpensesReader->onCreateLoader()");
 
-        if (mSmsProvidersMap.containsKey(id)) {
-            CursorLoader cursorLoader = mSmsProvidersMap.get(id).cursorLoader(mContext);
-            if (cursorLoader != null) {
-                ++mActiveCursors;
-            }
+        CursorLoader cursorLoader = mSmsProvidersMap.get(id).cursorLoader(mContext);
+        ++mActiveCursors;
 
-            return cursorLoader;
-        }
+        return cursorLoader;
 
-        return null;
+//        if (mSmsProvidersMap.containsKey(id)) {
+//            CursorLoader cursorLoader = mSmsProvidersMap.get(id).cursorLoader(mContext);
+//            if (cursorLoader != null) {
+//                ++mActiveCursors;
+//            }
+//
+//            return cursorLoader;
+//        }
+//
+//        return null;
     }
 
     @Override
