@@ -7,8 +7,8 @@ android {
         applicationId "com.costs.newcosts"
         minSdkVersion 14
         targetSdkVersion 29
-        versionCode 27
-        versionName "1.151"
+        versionCode 28
+        versionName "1.153"
     }
     buildTypes {
         release {
